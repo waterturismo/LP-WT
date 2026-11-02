@@ -45,6 +45,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
           <a class="wt-btn" href="#contratar" style="background: #e8892a; color: #0b2340; font-weight: 700; font-size: 16px; letter-spacing: .04em; text-decoration: none; padding: 17px 30px; border-radius: 999px; min-height: 54px; box-sizing: border-box; display: inline-flex; align-items: center">Contratar assessoria</a>
           <span style="font-size: 16px; color: #ffffff"><strong style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px">R$ 120</strong> por passaporte</span>
         </div>
+        <p style="margin: 0; font-size: 14px; color: #c3d2e3">+ taxa da Polícia Federal de R$ 257,25 por passaporte, paga diretamente à PF.</p>
       </div>
       <div style="flex: 0 1 360px; min-width: 0; margin: 0 auto">
         <img src="img/passaporte.jpg" alt="Passaporte brasileiro sobre uma mesa com mapa e café" style="display: block; width: 100%; max-width: 360px; aspect-ratio: 37 / 40; object-fit: cover; border-radius: 24px; border: 2px solid #e8892a">
@@ -103,7 +104,8 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
         <div style="margin-top: 18px; background: #fff4e8; border-radius: 14px; padding: 16px 20px">
             <div id="p-linhas" style="font-size: 15px; line-height: 1.7; color: #44525f; white-space: pre-line"></div>
             <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 26px; color: #0b2340; margin-top: 6px">Total: <span id="p-total"></span></div>
-            <div style="font-size: 13px; color: #4a5868; margin-top: 6px">Valor da assessoria. A taxa de emissão do passaporte é paga diretamente à Polícia Federal.</div>
+            <div style="font-size: 13px; color: #4a5868; margin-top: 6px">Valor da assessoria.</div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3cfa5; font-size: 14px; line-height: 1.55; color: #0b2340"><strong>Taxa da Polícia Federal:</strong> R$ 257,25 por passaporte (<span id="p-taxa"></span> no total). Paga diretamente à Polícia Federal pela guia de recolhimento (GRU), à parte do valor da assessoria.</div>
         </div>
       </fieldset>
 
@@ -182,7 +184,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
       <div>
         <label style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.55; color: #44525f; cursor: pointer">
           <input type="checkbox" id="v-ciente" name="ciente" style="width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: #1c6fb5">
-          <span>Estou ciente de que a taxa de emissão do passaporte (GRU) é paga diretamente à Polícia Federal e não está incluída no valor da assessoria, e de que a emissão é decisão da Polícia Federal.</span>
+          <span>Estou ciente de que a taxa de emissão do passaporte (GRU), de R$ 257,25 por passaporte, é paga diretamente à Polícia Federal e não está incluída no valor da assessoria, e de que a emissão é decisão da Polícia Federal.</span>
         </label>
         <p class="err" data-err="ciente" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">É preciso confirmar para continuar.</p>
       </div>
@@ -256,7 +258,9 @@ var ENDPOINT_PASSAPORTE = '';
   var brl = function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); };
   var q = 1;
   function calc() { var c = Math.floor(q / 5), l = []; if (q) l.push(q + 'x passaporte · ' + brl(PRECO_PASSAPORTE * q)); if (c) l.push(c + ' cortesia' + (c > 1 ? 's' : '') + ' · − ' + brl(PRECO_PASSAPORTE * c)); return { cort: c, linhas: l.join('\n') || 'Nenhum passaporte', totalNum: (q - c) * PRECO_PASSAPORTE }; }
-  function render() { $('p-qtd').textContent = q; var c = calc(); $('p-linhas').textContent = c.linhas; $('p-total').textContent = brl(c.totalNum); }
+  var TAXA_PF = 257.25;
+  function brl2(v) { return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function render() { $('p-qtd').textContent = q; var c = calc(); $('p-linhas').textContent = c.linhas; $('p-total').textContent = brl(c.totalNum); $('p-taxa').textContent = brl2(q * TAXA_PF); }
   document.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { q = Math.max(0, Math.min(30, q + (+b.dataset.step))); render(); }); });
   var masks = {
     cpf: function (v) { var d = dig(v).slice(0, 11); return d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); },
@@ -287,7 +291,7 @@ var ENDPOINT_PASSAPORTE = '';
     $('v-alert').hidden = !algum;
     if (algum) { var f1 = form.querySelector('.err:not([hidden])'); if (f1) f1.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     var c = calc();
-    var dados = { servico: 'Assessoria passaporte brasileiro', quantidade: q, cortesias: c.cort, valor_unitario: PRECO_PASSAPORTE, valor_total: c.totalNum,
+    var dados = { servico: 'Assessoria passaporte brasileiro', quantidade: q, cortesias: c.cort, valor_unitario: PRECO_PASSAPORTE, valor_total: c.totalNum, taxa_pf_total: Math.round(q * TAXA_PF * 100) / 100,
       contratante: { nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'), email: v('email'), whatsapp: v('tel') },
       endereco: { cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('compl'), bairro: v('bairro'), cidade: v('cidade'), uf: v('uf') },
       kommo: { funil: 'VENDAS 1', etapa: 'RESERVA' }, ciente_taxa_pf: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
