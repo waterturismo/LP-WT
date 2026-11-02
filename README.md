@@ -26,3 +26,8 @@ Enquanto os `ENDPOINT_*` estiverem vazios, cada formulário abre o WhatsApp da a
 
 ## Publicação
 Ainda não publicado. Para publicar no Netlify, basta apontar o site para este repositório (sem build; pasta raiz).
+
+## Netlify
+- Projeto: `lp-waterturismo` (time WATER TURISMO), **sem deploy automático**: este repositório não está ligado ao Netlify de propósito, para não gastar 15 créditos a cada commit.
+- Publicação só manual, em lote, quando as mudanças forem aprovadas.
+- Domínio: waterturismo.com.br e www.waterturismo.com.br. Manter os registros de e-mail (MX) intactos ao configurar o DNS.
