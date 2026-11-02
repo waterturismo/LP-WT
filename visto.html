@@ -175,7 +175,8 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
       A cada 5 solicitantes B1/B2, 1 assessoria é cortesia
     </p>
 
-    <form id="form-visto" novalidate style="background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
+    <form id="form-visto" novalidate data-h="1" style="position: relative; background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
+      <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0">
       <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
         <legend style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: #0b2340; margin-bottom: 14px; padding: 0">1. Quantas pessoas?</legend>
         <div style="display: flex; flex-direction: column; gap: 12px">
@@ -295,7 +296,7 @@ function enviarWhatsApp(titulo, dados) {
 /* ==== CONFIGURAÇÃO ====
    ENDPOINT_VISTO: URL que recebe os pedidos de proposta (integração com o Kommo).
    Enquanto estiver vazio, o pedido é enviado pelo WhatsApp da agência. */
-var ENDPOINT_VISTO = '';
+var ENDPOINT_VISTO = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1/lp-leads';
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var form = $('form-visto'); if (!form) return;
@@ -313,14 +314,14 @@ var ENDPOINT_VISTO = '';
     $('v-alert').hidden = !algum;
     if (algum) { var f1 = form.querySelector('.err:not([hidden])'); if (f1) f1.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     var partes = []; if (st.B) partes.push(st.B + ' B1/B2'); if (st.N) partes.push(st.N + ' babá');
-    var dados = { servico: 'Proposta assessoria visto americano B1/B2', qtd_b1b2: st.B, qtd_baba: st.N, nome: v('nome'), email: v('email'), whatsapp: v('tel'),
+    var dados = { tipo: 'visto', site_web: ($('site_web') || {}).value || '', servico: 'Proposta assessoria visto americano B1/B2', qtd_b1b2: st.B, qtd_baba: st.N, nome: v('nome'), email: v('email'), whatsapp: v('tel'),
       kommo: { funil: 'VENDAS 1', etapa: 'RESERVA' }, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
     function ok() { $('vs-nome').textContent = v('nome').split(/\s+/)[0]; $('vs-qtd').textContent = partes.join(' + '); form.hidden = true; $('v-sucesso').hidden = false; $('v-sucesso').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     if (!ENDPOINT_VISTO) { enviarWhatsApp('Proposta visto B1/B2', dados); ok(); return; }
     var btn = $('v-btn'); btn.disabled = true; btn.textContent = 'Enviando...';
     fetch(ENDPOINT_VISTO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
       .then(function (r) { if (!r.ok) throw new Error(r.status); ok(); })
-      .catch(function () { btn.disabled = false; btn.textContent = 'Solicitar proposta'; var a = $('v-alert'); a.textContent = 'Não foi possível enviar agora. Tente novamente ou fale com a gente pelo WhatsApp (64) 99298-9594.'; a.hidden = false; });
+      .catch(function () { enviarWhatsApp('Proposta visto B1/B2', dados); ok(); });
   });
   // Link pré-preenchido pela equipe: ?b1b2=4&baba=1
   try { var q = new URLSearchParams(location.search), qb = parseInt(q.get('b1b2'), 10), qn = parseInt(q.get('baba'), 10); if (qb >= 0 && qb <= 20) st.B = qb; if (qn >= 0 && qn <= 20) st.N = qn; } catch (e) {}

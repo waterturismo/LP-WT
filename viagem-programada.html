@@ -184,8 +184,9 @@ details summary::-webkit-details-marker{display:none}details[open] summary svg{t
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; color: #0b2340">Contrate sua Viagem Programada</h2>
     <p style="margin: 0 0 28px; font-size: 17px; line-height: 1.6; color: #44525f">Escolha o plano, preencha seus dados e envie. Um consultor entra em contato para enviar o contrato e os boletos.</p>
 
-    <form id="form-adesao" novalidate style="background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
+    <form id="form-adesao" novalidate style="position: relative; background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
       <input type="hidden" name="plano" id="f-plano" value="Superior">
+      <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0">
       <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
         <legend style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: #0b2340; margin-bottom: 14px; padding: 0">1. Seu plano</legend>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 12px">
@@ -374,7 +375,7 @@ function enviarWhatsApp(titulo, dados) {
 /* ==== CONFIGURAÇÃO DO ENVIO ====
    Coloque aqui a URL que recebe as adesões (webhook do Kommo, Make, Supabase etc.).
    Enquanto estiver vazia, o formulário NÃO envia os dados para lugar nenhum. */
-var ENDPOINT_ADESAO = '';
+var ENDPOINT_ADESAO = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1/lp-leads';
 
 (function () {
   var precos = { Essencial: 250, Superior: 400, Luxo: 600 };
@@ -450,7 +451,7 @@ var ENDPOINT_ADESAO = '';
     if (algum) { var first = form.querySelector('.err:not([hidden])'); if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
     var plano = $('f-plano').value, n = +$('f-parcelas').value, m = precos[plano];
-    var dados = { plano: plano, parcelas: n, mensalidade: m, credito: m * n, vencimento_1o_boleto: v('venc'), nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'),
+    var dados = { tipo: 'programada', site_web: ($('site_web') || {}).value || '', plano: plano, parcelas: n, mensalidade: m, credito: m * n, vencimento_1o_boleto: v('venc'), nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'),
       email: v('email'), whatsapp: v('tel'), cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('compl'),
       bairro: v('bairro'), cidade: v('cidade'), uf: v('uf'), aceite_regras: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
 
@@ -466,10 +467,7 @@ var ENDPOINT_ADESAO = '';
     var btn = $('btn-enviar'); btn.disabled = true; btn.textContent = 'Enviando...';
     fetch(ENDPOINT_ADESAO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
       .then(function (r) { if (!r.ok) throw new Error(r.status); sucesso(); })
-      .catch(function () {
-        btn.disabled = false; btn.textContent = 'Contratar Viagem Programada';
-        var a = $('form-alert'); a.textContent = 'Não foi possível enviar agora. Tente novamente ou fale com a gente pelo WhatsApp (64) 99298-9594.'; a.hidden = false;
-      });
+      .catch(function () { enviarWhatsApp('Water Viagem Programada', dados); sucesso(); });
   });
   // Link pré-preenchido pela equipe: ?plano=Superior&parcelas=24
   try {

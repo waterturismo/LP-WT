@@ -30,3 +30,10 @@ Ainda não publicado. Para publicar no Netlify, basta apontar o site para este r
 ## Publicação
 - Hospedado no **GitHub Pages** (branch `main`, pasta raiz). Cada commit na `main` vai ao ar em ~1 minuto, sem custo.
 - Domínio: `waterturismo.com.br` (arquivo `CNAME`). DNS na Wix: 4 registros A do GitHub no domínio principal e CNAME `www → waterturismo.github.io`. Registros de e-mail (MX/TXT) e o `indique` não devem ser alterados.
+
+## Integração com o Kommo
+- Os formulários enviam para a função `lp-leads` no Supabase (projeto `indique-homologacao`), código em `supabase/functions/lp-leads/index.ts`.
+- A função cria o lead no Kommo, funil **VENDAS 1** › etapa **RESERVA**, com contato (telefone e e-mail), etiquetas "Site Water Turismo" + serviço, e nota com todos os dados.
+- O token do Kommo fica no segredo `KOMMO_TOKEN` do Supabase (Edge Functions › Secrets). Nunca colocar o token neste repositório.
+- Proteções: só aceita envios de waterturismo.com.br, campo anti-robô, validação dos dados e limite de envios por IP.
+- Se a função falhar, o formulário envia os dados pelo WhatsApp da agência, para nenhum pedido se perder.
