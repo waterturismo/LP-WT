@@ -145,7 +145,7 @@ details summary::-webkit-details-marker{display:none}details[open] summary svg{t
       </details>
       <details style="border-bottom: 1px solid #e3e9f1">
         <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Pagamento<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
-        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Boletos mensais com vencimento até o dia 10. O crédito é a soma das parcelas pagas, sem correção monetária.</p>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Boletos mensais, com vencimento no dia que você escolher para o primeiro boleto (do dia 1 ao 28). O crédito é a soma das parcelas pagas, sem correção monetária.</p>
       </details>
       <details style="border-bottom: 1px solid #e3e9f1">
         <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Quando posso usar<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
@@ -205,11 +205,17 @@ details summary::-webkit-details-marker{display:none}details[open] summary svg{t
               <option value="12">12 parcelas</option><option value="18">18 parcelas</option><option value="24">24 parcelas</option><option value="30">30 parcelas</option><option value="36">36 parcelas</option>
             </select>
           </div>
+          <div style="flex: 0 1 240px; min-width: 0">
+            <label for="f-venc" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Vencimento do 1º boleto</label>
+            <input id="f-venc" name="venc" type="date" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
+            <p class="err" data-err="venc" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Escolha uma data entre 3 e 60 dias a partir de hoje, do dia 1 ao 28.</p>
+          </div>
           <div style="flex: 1 1 260px; min-width: 0; background: #fff4e8; border-radius: 14px; padding: 14px 18px">
             <div id="resumo" style="font-size: 14px; color: #44525f">12x de R$ 400</div>
             <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 24px; color: #0b2340; margin-top: 2px">Crédito de <span id="credito">R$ 4.800</span></div>
           </div>
         </div>
+        <p style="margin: 10px 0 0; font-size: 14px; color: #4a5868">Os demais boletos vencem no mesmo dia dos meses seguintes.</p>
       </fieldset>
 
       <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
@@ -315,6 +321,7 @@ details summary::-webkit-details-marker{display:none}details[open] summary svg{t
       <div style="display: inline-block; margin-top: 18px; background: #f4f7fb; border-radius: 14px; padding: 16px 22px; font-size: 16px; line-height: 1.7; color: #14202e; text-align: left">
         <div><strong style="color: #0b2340">Plano:</strong> <span id="s-plano"></span></div>
         <div><strong style="color: #0b2340">Crédito:</strong> <span id="s-credito"></span></div>
+        <div><strong style="color: #0b2340">1º vencimento:</strong> <span id="s-venc"></span></div>
         <div><strong style="color: #0b2340">E-mail:</strong> <span id="s-email"></span></div>
       </div>
       <p style="margin: 18px 0 0; font-family: 'Great Vibes', cursive; font-size: 36px; color: #b35a00">Cliente Water Turismo viaja mais!</p>
@@ -396,11 +403,17 @@ var ENDPOINT_ADESAO = '';
   }
   function maior(s) { if (!s) return false; var b = new Date(s + 'T00:00:00'); if (isNaN(b) || b.getFullYear() < 1900) return false; return new Date(b.getFullYear() + 18, b.getMonth(), b.getDate()) <= new Date(); }
   function v(k) { return ($('f-' + k).value || '').trim(); }
+  function iso(d) { var z = function (n) { return String(n).padStart(2, '0'); }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+  var hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  var vMin = new Date(hoje); vMin.setDate(vMin.getDate() + 3); var vMax = new Date(hoje); vMax.setDate(vMax.getDate() + 60);
+  $('f-venc').min = iso(vMin); $('f-venc').max = iso(vMax);
+  function vencOk(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s) && s >= iso(vMin) && s <= iso(vMax) && +s.slice(8) <= 28; }
+  function dataBR(s) { return s.slice(8) + '/' + s.slice(5, 7) + '/' + s.slice(0, 4); }
   function erros() {
     return {
       nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')), nasc: !maior(v('nasc')),
       email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')), tel: dig(v('tel')).length < 10, cep: dig(v('cep')).length !== 8,
-      rua: !v('rua'), numero: !v('numero'), bairro: !v('bairro'), cidade: !v('cidade'), uf: !v('uf'), regras: !$('f-regras').checked, consent: !$('f-consent').checked
+      rua: !v('rua'), numero: !v('numero'), bairro: !v('bairro'), cidade: !v('cidade'), uf: !v('uf'), venc: !vencOk(v('venc')), regras: !$('f-regras').checked, consent: !$('f-consent').checked
     };
   }
   form.addEventListener('submit', function (ev) {
@@ -415,7 +428,7 @@ var ENDPOINT_ADESAO = '';
     if (algum) { var first = form.querySelector('.err:not([hidden])'); if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
 
     var plano = $('f-plano').value, n = +$('f-parcelas').value, m = precos[plano];
-    var dados = { plano: plano, parcelas: n, mensalidade: m, credito: m * n, nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'),
+    var dados = { plano: plano, parcelas: n, mensalidade: m, credito: m * n, vencimento_1o_boleto: v('venc'), nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'),
       email: v('email'), whatsapp: v('tel'), cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('compl'),
       bairro: v('bairro'), cidade: v('cidade'), uf: v('uf'), aceite_regras: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
 
@@ -423,6 +436,7 @@ var ENDPOINT_ADESAO = '';
       $('s-nome').textContent = dados.nome.split(/\s+/)[0];
       $('s-plano').textContent = plano + ' · ' + n + 'x de ' + brl(m);
       $('s-credito').textContent = brl(m * n);
+      $('s-venc').textContent = dataBR(v('venc'));
       $('s-email').textContent = dados.email;
       form.hidden = true; $('sucesso').hidden = false; $('sucesso').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -435,6 +449,12 @@ var ENDPOINT_ADESAO = '';
         var a = $('form-alert'); a.textContent = 'Não foi possível enviar agora. Tente novamente ou fale com a gente pelo WhatsApp (64) 99298-9594.'; a.hidden = false;
       });
   });
+  // Link pré-preenchido pela equipe: ?plano=Superior&parcelas=24
+  try {
+    var q = new URLSearchParams(location.search), pl = (q.get('plano') || '').toLowerCase(), pc = q.get('parcelas');
+    Object.keys(precos).forEach(function (k) { if (k.toLowerCase() === pl) $('f-plano').value = k; });
+    if (['12', '18', '24', '30', '36'].indexOf(pc) > -1) $('f-parcelas').value = pc;
+  } catch (e) {}
   atualizar();
 })();
 </script>

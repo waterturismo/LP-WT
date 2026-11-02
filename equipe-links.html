@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Gerador de links — Equipe Water Turismo</title>
+<link rel="icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f7fb;font-family:'DM Sans',system-ui,sans-serif;color:#14202e}
+.wrap{max-width:760px;margin:0 auto;padding:32px 16px 64px}
+h1{font-family:'Playfair Display',Georgia,serif;color:#0b2340;font-size:30px;margin:12px 0 4px}
+h2{font-family:'Playfair Display',Georgia,serif;color:#0b2340;font-size:22px;margin:0 0 16px}
+.card{background:#fff;border:1px solid #e3e9f1;border-radius:20px;padding:24px;margin-top:20px}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.row>div{flex:1 1 180px;min-width:0}
+label{display:block;font-size:14px;font-weight:700;color:#0b2340;margin-bottom:6px}
+select,input{width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;font:inherit;font-size:16px;border-radius:12px;border:1.5px solid #c9d6e5;background:#fff;color:#14202e}
+.out{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+.out input{flex:1 1 300px;font-size:14px;background:#f4f7fb}
+button,a.btn{font:inherit;cursor:pointer;min-height:48px;padding:12px 20px;border-radius:999px;border:0;font-weight:700;font-size:15px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.pri{background:#e8892a;color:#0b2340}.sec{background:#fff;color:#1c6fb5;border:1.5px solid #1c6fb5}
+.note{font-size:14px;color:#4a5868;margin:10px 0 0}
+.ok{font-size:14px;font-weight:700;color:#1c6fb5;min-height:20px;margin-top:6px}
+button:focus-visible,a.btn:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e8892a;outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img src="logo.png" alt="Water Turismo" style="height:64px">
+  <h1>Gerador de links</h1>
+  <p style="margin:0;color:#44525f">Uso interno da equipe. Escolha as opções, copie o link e envie ao cliente — o formulário abre já preenchido.</p>
+
+  <section class="card" aria-labelledby="t1">
+    <h2 id="t1">Viagem Programada</h2>
+    <div class="row">
+      <div><label for="plano">Plano</label><select id="plano"><option>Essencial</option><option selected>Superior</option><option>Luxo</option></select></div>
+      <div><label for="parcelas">Parcelas</label><select id="parcelas"><option>12</option><option>18</option><option>24</option><option>30</option><option>36</option></select></div>
+    </div>
+    <p class="note" id="vp-resumo"></p>
+    <div class="out"><input id="vp-link" readonly aria-label="Link da Viagem Programada"><button class="pri" data-copy="vp-link">Copiar link</button><a class="btn sec" id="vp-wa" target="_blank" rel="noopener">Enviar no WhatsApp</a></div>
+    <div class="ok" id="vp-ok" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="t2">
+    <h2 id="t2">Visto americano B1/B2</h2>
+    <div class="row">
+      <div><label for="b1b2">Solicitantes B1/B2</label><input id="b1b2" type="number" min="0" max="20" value="1" inputmode="numeric"></div>
+      <div><label for="baba">Babá</label><input id="baba" type="number" min="0" max="20" value="0" inputmode="numeric"></div>
+    </div>
+    <p class="note" id="v-resumo"></p>
+    <div class="out"><input id="v-link" readonly aria-label="Link do visto"><button class="pri" data-copy="v-link">Copiar link</button><a class="btn sec" id="v-wa" target="_blank" rel="noopener">Enviar no WhatsApp</a></div>
+    <div class="ok" id="v-ok" aria-live="polite"></div>
+  </section>
+  <p class="note">"Enviar no WhatsApp" abre o WhatsApp com a mensagem pronta para você escolher o contato.</p>
+</div>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var base = location.href.replace(/[^/]*$/, '');
+  var precos = { Essencial: 250, Superior: 400, Luxo: 600 };
+  var brl = function (v) { return 'R$ ' + v.toLocaleString('pt-BR'); };
+  function wa(t) { return 'https://wa.me/?text=' + encodeURIComponent(t); }
+  function vp() {
+    var p = $('plano').value, n = +$('parcelas').value;
+    var link = base + 'viagem-programada.html?plano=' + p + '&parcelas=' + n + '#adesao';
+    $('vp-link').value = link; $('vp-resumo').textContent = p + ' · ' + n + 'x de ' + brl(precos[p]) + ' · crédito de ' + brl(precos[p] * n);
+    $('vp-wa').href = wa('Olá! Segue o link para concluir a adesão à sua Water Viagem Programada (plano ' + p + ', ' + n + 'x de ' + brl(precos[p]) + '). É só preencher seus dados: ' + link);
+  }
+  function vi() {
+    var clamp = function (x) { x = parseInt(x, 10); return isNaN(x) ? 0 : Math.max(0, Math.min(20, x)); };
+    var b = clamp($('b1b2').value), n = clamp($('baba').value), c = Math.floor(b / 5);
+    var link = base + 'visto.html?b1b2=' + b + '&baba=' + n + '#contratar';
+    var partes = []; if (b) partes.push(b + ' B1/B2' + (c ? ' (' + c + ' cortesia' + (c > 1 ? 's' : '') + ')' : '')); if (n) partes.push(n + ' babá');
+    $('v-link').value = link; $('v-resumo').textContent = partes.join(' + ') || 'Nenhum solicitante';
+    $('v-wa').href = wa('Olá! Segue o link para contratar a assessoria de visto americano (' + (partes.join(' + ') || '') + '). É só preencher os dados do responsável: ' + link);
+  }
+  ['plano', 'parcelas'].forEach(function (id) { $(id).addEventListener('change', vp); });
+  ['b1b2', 'baba'].forEach(function (id) { $(id).addEventListener('input', vi); });
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var inp = $(btn.dataset.copy), ok = $(btn.dataset.copy.replace('link', 'ok'));
+      var done = function () { ok.textContent = 'Link copiado!'; setTimeout(function () { ok.textContent = ''; }, 2500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, function () { inp.select(); document.execCommand('copy'); done(); });
+      else { inp.select(); document.execCommand('copy'); done(); }
+    });
+  });
+  vp(); vi();
+})();
+</script>
+</body>
+</html>
