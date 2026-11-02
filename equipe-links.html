@@ -77,11 +77,11 @@ button:focus-visible,a.btn:focus-visible,select:focus-visible,input:focus-visibl
   }
   function vi() {
     var clamp = function (x) { x = parseInt(x, 10); return isNaN(x) ? 0 : Math.max(0, Math.min(20, x)); };
-    var b = clamp($('b1b2').value), n = clamp($('baba').value), c = Math.floor(b / 5), tot = (b - c) * 590 + n * 890;
+    var b = clamp($('b1b2').value), n = clamp($('baba').value), c = Math.floor(b / 5);
     var link = base + 'visto.html?b1b2=' + b + '&baba=' + n + '#contratar';
     var partes = []; if (b) partes.push(b + ' B1/B2' + (c ? ' (' + c + ' cortesia' + (c > 1 ? 's' : '') + ')' : '')); if (n) partes.push(n + ' babá');
-    $('v-link').value = link; $('v-resumo').textContent = (partes.join(' + ') || 'Nenhum solicitante') + ' · total ' + brl(tot);
-    $('v-wa').href = wa('Olá! Segue o link para contratar a assessoria de visto americano (' + (partes.join(' + ') || '') + '). É só preencher os dados do responsável: ' + link);
+    $('v-link').value = link; $('v-resumo').textContent = (partes.join(' + ') || 'Nenhum solicitante');
+    $('v-wa').href = wa('Olá! Segue o link para solicitar sua proposta de assessoria de visto americano (' + (partes.join(' + ') || '') + '). É só deixar seu contato: ' + link);
   }
   ['plano', 'parcelas'].forEach(function (id) { $(id).addEventListener('change', vp); });
   ['b1b2', 'baba'].forEach(function (id) { $(id).addEventListener('input', vi); });
