@@ -17,8 +17,10 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 .wt-btn{transition:transform .15s ease, box-shadow .15s ease}
 .wt-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(11,35,64,.14)}
 .wt-btn:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #e8892a;outline-offset:2px}
+details summary::-webkit-details-marker{display:none}details[open] summary svg{transform:rotate(180deg)}
 @media (max-width: 560px){#adesao [style*="grid-column: span 1"]{grid-column: span 2 !important}}
 </style>
+<style>details summary::-webkit-details-marker{display:none}details[open] summary svg{transform:rotate(180deg)}</style>
 <style>@media (max-width: 560px){.grid2 > div{grid-column: span 2 !important}}</style>
 </head>
 <body>
@@ -69,7 +71,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
       <li style="background: #ffffff; border: 1px solid #e3e9f1; border-radius: 18px; padding: 24px">
         <div style="width: 40px; height: 40px; border-radius: 50%; background: #e8892a; color: #0b2340; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center">4</div>
         <div style="font-weight: 700; font-size: 18px; color: #0b2340; margin-top: 16px">Viaje com seu crédito</div>
-        <div style="font-size: 16px; color: #4a5868; margin-top: 6px; line-height: 1.55">Use o crédito no destino que escolher, com o planejamento da nossa equipe.</div>
+        <div style="font-size: 16px; color: #4a5868; margin-top: 6px; line-height: 1.55">Use o crédito em um pacote (aéreo + hospedagem) para o destino que escolher.</div>
       </li>
     </ol>
   </section>
@@ -128,7 +130,48 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
         <a class="wt-btn" href="#adesao" data-choose="Luxo" style="background: #ffffff; color: #1c6fb5; border: 1.5px solid #1c6fb5; margin-top: auto; font-weight: 700; font-size: 16px; text-decoration: none; padding: 14px 20px; border-radius: 999px; min-height: 50px; box-sizing: border-box; display: flex; align-items: center; justify-content: center">Quero o plano Luxo</a>
       </article>
     </div>
-    <p style="margin: 24px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868">Crédito = valor da parcela × número de parcelas. As condições completas são apresentadas no contrato de adesão.</p>
+    <p style="margin: 24px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868">Crédito = valor da parcela × número de parcelas. As condições completas são apresentadas no contrato de adesão. <a href="#regras" style="font-weight: 700">Ver as regras</a></p>
+  </section>
+
+  <!-- Regras -->
+  <section id="regras" style="max-width: 860px; margin: 0 auto; padding: 56px 20px 8px">
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #1c6fb5; margin-bottom: 10px">Regras</div>
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; color: #0b2340">Regras da Viagem Programada</h2>
+    <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.6; color: #44525f">Resumo das principais condições. O texto completo está no contrato, enviado pelo consultor antes da assinatura.</p>
+    <div style="background: #ffffff; border: 1px solid #e3e9f1; border-radius: 20px; padding: 4px clamp(16px, 3vw, 28px)">
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">O que o crédito compra<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Pacotes de viagem nacionais e internacionais da Water Turismo. Um pacote tem, no mínimo, passagem aérea e hospedagem, e pode incluir aluguel de carro, transfer, ingressos e seguro.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Pagamento<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Boletos mensais com vencimento até o dia 10. O crédito é a soma das parcelas pagas, sem correção monetária.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Quando posso usar<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">O crédito fica disponível depois que pelo menos 6 parcelas forem pagas. O titular do plano precisa ser um dos viajantes. Se o pacote custar mais que o crédito, você paga a diferença.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Validade<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">12 meses após a quitação de todas as parcelas. Se o crédito não for usado nesse prazo, o contrato se encerra e o valor é devolvido mediante solicitação, com retenção de 20% de taxa de administração.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Cancelamento<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Você pode cancelar a qualquer momento antes de usar todo o crédito. É retida multa de 15% sobre o valor já pago, e o restante é devolvido em até 30 dias.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Atraso<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Três parcelas em atraso encerram o contrato automaticamente, com multa de 15% sobre o valor pago. O saldo fica disponível para devolução.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Transferência e saque<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">O crédito não pode ser trocado por dinheiro nem transferido para outra pessoa.</p>
+      </details>
+      <details style="border-bottom: 1px solid #e3e9f1">
+        <summary style="cursor: pointer; list-style: none; padding: 18px 4px; min-height: 44px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 700; font-size: 17px; color: #0b2340">Preço dos pacotes<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1c6fb5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M6 9l6 6 6-6"></path></svg></summary>
+        <p style="margin: 0; padding: 0 4px 18px; font-size: 16px; line-height: 1.65; color: #44525f">Os pacotes seguem a disponibilidade e as condições de mercado na data da compra.</p>
+      </details>
+    </div>
   </section>
 
   <!-- Adesão -->
@@ -243,6 +286,14 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 
       <div>
         <label style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.55; color: #44525f; cursor: pointer">
+          <input type="checkbox" id="f-regras" name="regras" style="width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: #1c6fb5">
+          <span>Li e concordo com as <a href="#regras" style="font-weight: 700">regras da Viagem Programada</a>.</span>
+        </label>
+        <p class="err" data-err="regras" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">É preciso concordar com as regras para continuar.</p>
+      </div>
+
+      <div>
+        <label style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.55; color: #44525f; cursor: pointer">
           <input type="checkbox" id="f-consent" name="consent" style="width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: #1c6fb5">
           <span>Autorizo a Water Turismo a usar meus dados para elaborar o contrato e emitir os boletos da Viagem Programada, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018).</span>
         </label>
@@ -349,7 +400,7 @@ var ENDPOINT_ADESAO = '';
     return {
       nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')), nasc: !maior(v('nasc')),
       email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')), tel: dig(v('tel')).length < 10, cep: dig(v('cep')).length !== 8,
-      rua: !v('rua'), numero: !v('numero'), bairro: !v('bairro'), cidade: !v('cidade'), uf: !v('uf'), consent: !$('f-consent').checked
+      rua: !v('rua'), numero: !v('numero'), bairro: !v('bairro'), cidade: !v('cidade'), uf: !v('uf'), regras: !$('f-regras').checked, consent: !$('f-consent').checked
     };
   }
   form.addEventListener('submit', function (ev) {
@@ -357,7 +408,7 @@ var ENDPOINT_ADESAO = '';
     var e = erros(), algum = false;
     Object.keys(e).forEach(function (k) {
       var msg = document.querySelector('[data-err="' + k + '"]'); if (msg) msg.hidden = !e[k];
-      var inp = $('f-' + k); if (inp && k !== 'consent') inp.style.borderColor = e[k] ? '#b3261e' : '#c9d6e5';
+      var inp = $('f-' + k); if (inp && k !== 'consent' && k !== 'regras') inp.style.borderColor = e[k] ? '#b3261e' : '#c9d6e5';
       if (e[k]) algum = true;
     });
     $('form-alert').hidden = !algum;
@@ -366,7 +417,7 @@ var ENDPOINT_ADESAO = '';
     var plano = $('f-plano').value, n = +$('f-parcelas').value, m = precos[plano];
     var dados = { plano: plano, parcelas: n, mensalidade: m, credito: m * n, nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'),
       email: v('email'), whatsapp: v('tel'), cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('compl'),
-      bairro: v('bairro'), cidade: v('cidade'), uf: v('uf'), consentimento_lgpd: true, enviado_em: new Date().toISOString() };
+      bairro: v('bairro'), cidade: v('cidade'), uf: v('uf'), aceite_regras: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
 
     function sucesso() {
       $('s-nome').textContent = dados.nome.split(/\s+/)[0];
