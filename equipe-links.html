@@ -53,6 +53,13 @@ button:focus-visible,a.btn:focus-visible,select:focus-visible,input:focus-visibl
     <div class="out"><input id="v-link" readonly aria-label="Link do visto"><button class="pri" data-copy="v-link">Copiar link</button><a class="btn sec" id="v-wa" target="_blank" rel="noopener">Enviar no WhatsApp</a></div>
     <div class="ok" id="v-ok" aria-live="polite"></div>
   </section>
+  <section class="card" aria-labelledby="t3">
+    <h2 id="t3">Passaporte brasileiro</h2>
+    <div class="row"><div><label for="pqtd">Passaportes</label><input id="pqtd" type="number" min="1" max="30" value="1" inputmode="numeric"></div><div></div></div>
+    <p class="note" id="p-resumo"></p>
+    <div class="out"><input id="p-link" readonly aria-label="Link do passaporte"><button class="pri" data-copy="p-link">Copiar link</button><a class="btn sec" id="p-wa" target="_blank" rel="noopener">Enviar no WhatsApp</a></div>
+    <div class="ok" id="p-ok" aria-live="polite"></div>
+  </section>
   <p class="note">"Enviar no WhatsApp" abre o WhatsApp com a mensagem pronta para você escolher o contato.</p>
 </div>
 <script>
@@ -70,10 +77,10 @@ button:focus-visible,a.btn:focus-visible,select:focus-visible,input:focus-visibl
   }
   function vi() {
     var clamp = function (x) { x = parseInt(x, 10); return isNaN(x) ? 0 : Math.max(0, Math.min(20, x)); };
-    var b = clamp($('b1b2').value), n = clamp($('baba').value), c = Math.floor(b / 5);
+    var b = clamp($('b1b2').value), n = clamp($('baba').value), c = Math.floor(b / 5), tot = (b - c) * 590 + n * 890;
     var link = base + 'visto.html?b1b2=' + b + '&baba=' + n + '#contratar';
     var partes = []; if (b) partes.push(b + ' B1/B2' + (c ? ' (' + c + ' cortesia' + (c > 1 ? 's' : '') + ')' : '')); if (n) partes.push(n + ' babá');
-    $('v-link').value = link; $('v-resumo').textContent = partes.join(' + ') || 'Nenhum solicitante';
+    $('v-link').value = link; $('v-resumo').textContent = (partes.join(' + ') || 'Nenhum solicitante') + ' · total ' + brl(tot);
     $('v-wa').href = wa('Olá! Segue o link para contratar a assessoria de visto americano (' + (partes.join(' + ') || '') + '). É só preencher os dados do responsável: ' + link);
   }
   ['plano', 'parcelas'].forEach(function (id) { $(id).addEventListener('change', vp); });
@@ -86,7 +93,14 @@ button:focus-visible,a.btn:focus-visible,select:focus-visible,input:focus-visibl
       else { inp.select(); document.execCommand('copy'); done(); }
     });
   });
-  vp(); vi();
+  function pa() {
+    var q = Math.max(1, Math.min(30, parseInt($('pqtd').value, 10) || 1)), c = Math.floor(q / 5);
+    var link = base + 'passaporte.html?qtd=' + q + '#contratar';
+    $('p-link').value = link; $('p-resumo').textContent = q + ' passaporte' + (q > 1 ? 's' : '') + (c ? ' (' + c + ' cortesia' + (c > 1 ? 's' : '') + ')' : '') + ' · total ' + brl((q - c) * 120);
+    $('p-wa').href = wa('Olá! Segue o link para contratar a assessoria de passaporte (' + q + ' passaporte' + (q > 1 ? 's' : '') + '). É só preencher os dados do contratante: ' + link);
+  }
+  $('pqtd').addEventListener('input', pa);
+  vp(); vi(); pa();
 })();
 </script>
 </body>

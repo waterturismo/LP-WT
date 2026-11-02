@@ -349,6 +349,23 @@ details summary::-webkit-details-marker{display:none}details[open] summary svg{t
 
 </div>
 <script>
+/* Enquanto o envio para o Kommo não estiver configurado, a solicitação é enviada pelo WhatsApp da agência. */
+function enviarWhatsApp(titulo, dados) {
+  var linhas = ['*' + titulo + ' — nova solicitação pelo site*'];
+  (function walk(o, pre) {
+    Object.keys(o).forEach(function (k) {
+      var v = o[k]; if (v === null || v === '' || k === 'enviado_em' || k === 'kommo') return;
+      if (typeof v === 'object' && !Array.isArray(v)) return walk(v, k + ' ');
+      if (v === true) v = 'sim';
+      linhas.push((pre + k).replace(/_/g, ' ') + ': ' + v);
+    });
+  })(dados, '');
+  var url = 'https://wa.me/5564992989594?text=' + encodeURIComponent(linhas.join('\n'));
+  var w = window.open(url, '_blank'); if (!w) location.href = url;
+}
+</script>
+
+<script>
 /* ==== CONFIGURAÇÃO DO ENVIO ====
    Coloque aqui a URL que recebe as adesões (webhook do Kommo, Make, Supabase etc.).
    Enquanto estiver vazia, o formulário NÃO envia os dados para lugar nenhum. */
@@ -440,7 +457,7 @@ var ENDPOINT_ADESAO = '';
       $('s-email').textContent = dados.email;
       form.hidden = true; $('sucesso').hidden = false; $('sucesso').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    if (!ENDPOINT_ADESAO) { console.warn('ENDPOINT_ADESAO vazio: dados não enviados', dados); sucesso(); return; }
+    if (!ENDPOINT_ADESAO) { enviarWhatsApp('Water Viagem Programada', dados); sucesso(); return; }
     var btn = $('btn-enviar'); btn.disabled = true; btn.textContent = 'Enviando...';
     fetch(ENDPOINT_ADESAO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
       .then(function (r) { if (!r.ok) throw new Error(r.status); sucesso(); })
