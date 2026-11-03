@@ -205,7 +205,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
       <p id="v-alert" role="alert" hidden style="margin: 0; padding: 12px 16px; border-radius: 12px; background: #fdecea; font-size: 15px; font-weight: 500; color: #8c1d18">Confira os campos destacados antes de enviar.</p>
 
       <button type="submit" id="v-btn" class="wt-btn" style="font: inherit; cursor: pointer; align-self: stretch; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Contratar assessoria</button>
-      <p style="margin: -12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868; text-align: center">Nenhum valor é cobrado agora. O consultor envia as orientações e a forma de pagamento.</p>
+      <p style="margin: -12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868; text-align: center">Ao enviar, você recebe o Pix da assessoria nesta tela. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
     </form>
 
     <div id="p-sucesso" hidden role="status" style="background: #ffffff; border: 2px solid #e8892a; border-radius: 22px; padding: clamp(28px, 5vw, 48px); text-align: center">
@@ -219,7 +219,18 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
         <div><strong style="color: #0b2340">Total da assessoria:</strong> <span id="ps-total"></span></div>
         <div><strong style="color: #0b2340">E-mail:</strong> <span id="ps-email"></span></div>
       </div>
+          <div id="p-pix" hidden style="margin: 26px auto 0; max-width: 420px; border-top: 1px solid #e3e9f1; padding-top: 24px">
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #1c6fb5">Pagamento via Pix</div>
+        <p style="margin: 8px 0 16px; font-size: 16px; line-height: 1.6; color: #44525f">Escaneie o QR Code no app do seu banco ou copie o código abaixo.</p>
+        <img id="p-pix-img" alt="QR Code Pix para pagamento" width="220" height="220" style="display: block; margin: 0 auto; width: 220px; height: 220px; max-width: 100%; border-radius: 14px; border: 1px solid #e3e9f1; background: #ffffff; padding: 8px; box-sizing: content-box">
+        <div style="margin-top: 16px; display: flex; gap: 8px; align-items: stretch">
+          <input id="p-pix-code" readonly aria-label="Código Pix copia e cola" style="flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 12px 14px; border: 1px solid #c9d6e5; border-radius: 12px; background: #f4f7fb; color: #14202e">
+          <button type="button" id="p-pix-copiar" class="wt-btn" style="font: inherit; cursor: pointer; background: #0b2340; color: #ffffff; border: 0; font-weight: 700; font-size: 15px; padding: 0 18px; border-radius: 12px; min-height: 48px">Copiar</button>
         </div>
+        <p id="p-pix-status" aria-live="polite" style="margin: 16px 0 0; font-size: 15px; font-weight: 500; color: #b35a00">Aguardando pagamento · válido por 24 horas</p>
+        <p style="margin: 10px 0 0; font-size: 13px; line-height: 1.6; color: #4a5868">Pagamento processado pelo Mercado Pago em nome de Water Viagens e Turismo LTDA. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
+      </div>
+    </div>
   </section>
 
   <!-- Rodapé -->
@@ -310,9 +321,28 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
     if (!ENDPOINT_PASSAPORTE) { enviarWhatsApp('Assessoria passaporte', dados); ok(); return; }
     var btn = $('v-btn'); btn.disabled = true; btn.textContent = 'Enviando...';
     fetch(ENDPOINT_PASSAPORTE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); ok(); })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json().catch(function () { return {}; }); })
+      .then(function (j) { ok(); if (j && j.pix && j.pix.qr) mostrarPix(j.pix); })
       .catch(function () { enviarWhatsApp('Assessoria passaporte', dados); ok(); });
   });
+  function mostrarPix(px) {
+    $('p-pix-img').src = 'data:image/png;base64,' + px.img; $('p-pix-code').value = px.qr; $('p-pix').hidden = false;
+    var msg = $('p-sucesso').querySelector('p'); if (msg) msg.textContent = 'Falta só o pagamento. Assim que o Pix for confirmado, um consultor da Water Turismo fala com você para dar sequência à assessoria do seu passaporte.';
+    $('p-pix-copiar').onclick = function () {
+      var c = $('p-pix-code'); c.select();
+      var done = function () { $('p-pix-copiar').textContent = 'Copiado!'; setTimeout(function () { $('p-pix-copiar').textContent = 'Copiar'; }, 2500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(px.qr).then(done, function () { try { document.execCommand('copy'); done(); } catch (e) {} });
+      else { try { document.execCommand('copy'); done(); } catch (e) {} }
+    };
+    var tentativas = 0, st = $('p-pix-status');
+    var timer = setInterval(function () {
+      if (++tentativas > 240) { clearInterval(timer); return; }
+      fetch(ENDPOINT_PASSAPORTE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ acao: 'status_pix', pedido: px.pedido }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j && j.pago) { clearInterval(timer); st.style.color = '#1b7a3a'; st.textContent = 'Pagamento confirmado! Obrigado.'; $('p-pix-img').style.opacity = '.35'; } })
+        .catch(function () {});
+    }, 7000);
+  }
   // Link pré-preenchido pela equipe: ?qtd=3
   try { var qq = parseInt(new URLSearchParams(location.search).get('qtd'), 10); if (qq >= 1 && qq <= 30) q = qq; } catch (e) {}
   render();
