@@ -6,6 +6,7 @@ Landing page da Water Turismo (cartão de visita virtual), em HTML estático.
 - `index.html` — página principal: equipe, serviços, depoimentos
 - `visto.html` — assessoria para visto americano
 - `analise/` — página curta só com "Como funciona" + análise de perfil do visto, para o link da bio do Instagram (waterturismo.com.br/analise). Gerada a partir do visto.html; a nota no Kommo traz "Origem: Link da bio do Instagram"
+- `bio/` — link da bio do Instagram (waterturismo.com.br/bio): logo + 2 botões (Pacotes → WhatsApp 62 99181-5141 "Quero planejar minha próxima viagem"; Visto → /analise)
 - `viagem-programada.html` — Water Viagem Programada, com formulário de adesão e escolha do 1º vencimento
 - `visto.html` — também traz o formulário de contratação B1/B2 (com babá e cortesia a cada 5)
 - `passaporte.html` — assessoria de passaporte (R$ 120 cada; a cada 4, o 5º é cortesia)
