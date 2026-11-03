@@ -91,12 +91,10 @@ async function contatoExistente(tel: string) {
 // Respostas da análise de perfil (opcional), vindas da página de visto.
 function analiseTexto(a: unknown): string[] {
   if (!a || typeof a !== "object") return [];
-  const o = a as Record<string, unknown>, out: string[] = ["", "ANÁLISE DE PERFIL (respondida pelo cliente):"];
-  if (o.perfil) out.push(`Resultado mostrado: ${txt(o.perfil, 80)}`);
+  const o = a as Record<string, unknown>, out: string[] = ["", "RESPOSTAS DA ANÁLISE DE PERFIL (o cliente não viu resultado — analisar e retornar pelo WhatsApp):"];
   if (Array.isArray(o.respostas)) for (const r of o.respostas.slice(0, 12)) {
     if (r && typeof r === "object") { const x = r as Record<string, unknown>; out.push(`• ${txt(x.pergunta, 40)}: ${txt(x.resposta, 80)}`); }
   }
-  if (Array.isArray(o.atencao) && o.atencao.length) { out.push("Pontos de atenção:"); for (const t of o.atencao.slice(0, 8)) out.push(`- ${txt(t, 160)}`); }
   return out.length > 2 ? out : [];
 }
 
@@ -117,7 +115,7 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
     const partes = [qb ? `${qb} B1/B2` : "", qn ? `${qn} babá` : ""].filter(Boolean).join(" + ");
     return { tipo, nome, email, telefone: tel, etiqueta: "Visto B1/B2", preco: null,
       titulo: `${b.analise ? "Análise visto" : "Proposta visto"} – ${nome} (${partes})`,
-      nota: [`Pedido de PROPOSTA de assessoria para visto americano, enviado pelo site.`,
+      nota: [b.analise ? `Análise de perfil para visto americano enviada pelo site.` : `Pedido de PROPOSTA de assessoria para visto americano, enviado pelo site.`,
         `Solicitantes: ${partes}.` + (Math.floor(qb / 5) ? ` Tem direito a ${Math.floor(qb / 5)} cortesia(s) (a cada 5 B1/B2, 1 cortesia).` : ""),
         `Contato: ${nome} · ${tel} · ${email}`, ...analiseTexto(b.analise)] };
   }
