@@ -245,6 +245,42 @@ function excedeuConsultas(ip: string) {
   lista.push(agora); consultas.set(ip, lista); return lista.length > 120;
 }
 
+// ---------- estatística do site (link da bio e análise) ----------
+// Sem dados pessoais: só página, evento, origem e tipo de aparelho. Grava em public.site_eventos (painel do Indique e Ganhe).
+const ROBOS = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp\/|telegrambot|preview|headless|lighthouse|curl|wget|python|axios|node-fetch|go-http|java\/|monitor|uptime|scan/i;
+const ALVOS = ["lista_vip_black", "visto"];
+const sistemaDe = (ua: string) => /android/i.test(ua) ? "Android" : /iphone|ipad|ipod/i.test(ua) ? "iOS (iPhone/iPad)" : /windows/i.test(ua) ? "Windows"
+  : /mac os x|macintosh/i.test(ua) ? "macOS" : /cros/i.test(ua) ? "ChromeOS" : /linux/i.test(ua) ? "Linux" : "Outro";
+const aparelhoDe = (ua: string) => (/ipad|tablet/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua))) ? "Tablet" : /mobi|iphone|ipod|android/i.test(ua) ? "Celular" : "Computador";
+const navegadorDe = (ua: string) => /instagram/i.test(ua) ? "Instagram (navegador do app)" : /fban|fbav|fb_iab/i.test(ua) ? "Facebook (navegador do app)"
+  : /edg\//i.test(ua) ? "Edge" : /samsungbrowser/i.test(ua) ? "Samsung Internet" : /opr\/|opera/i.test(ua) ? "Opera" : /firefox|fxios/i.test(ua) ? "Firefox"
+  : /crios|chrome/i.test(ua) ? "Chrome" : /safari/i.test(ua) ? "Safari" : "Outro";
+function origemDe(marcacao: string, referencia: string, ua: string) {
+  const m = marcacao.trim().toLowerCase().replace(/[^a-z0-9 _-]/g, "").slice(0, 40);
+  const rot: Record<string, string> = { instagram: "Instagram", ig: "Instagram", facebook: "Facebook", fb: "Facebook", whatsapp: "WhatsApp", wpp: "WhatsApp", google: "Google", tiktok: "TikTok", bio: "Link da bio" };
+  if (m) return rot[m] ?? m.charAt(0).toUpperCase() + m.slice(1);
+  if (/instagram/i.test(ua)) return "Instagram";
+  if (/fban|fbav|fb_iab/i.test(ua)) return "Facebook";
+  let host = ""; try { host = referencia ? new URL(referencia).hostname.replace(/^www\./, "") : ""; } catch { host = ""; }
+  if (!host) return "Direto";
+  if (/waterturismo\.com\.br$/.test(host)) return "Site da Water Turismo";
+  if (/instagram\.com$/.test(host)) return "Instagram";
+  if (/facebook\.com$|fb\.me$/.test(host)) return "Facebook";
+  if (/(^|\.)google\./.test(host)) return "Google";
+  return host.slice(0, 60);
+}
+async function registrarEvento(pagina: string, evento: string, alvo: string | null, ua: string, marcacao = "", referencia = "") {
+  const url = Deno.env.get("SUPABASE_URL"), chave = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !chave || ROBOS.test(ua) || !ua) return;
+  const r = await fetch(`${url}/rest/v1/rpc/registrar_site_evento`, { method: "POST", signal: AbortSignal.timeout(5000),
+    headers: { apikey: chave, Authorization: `Bearer ${chave}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_pagina: pagina, p_evento: evento, p_alvo: alvo, p_origem: origemDe(marcacao, referencia, ua),
+      p_sistema: sistemaDe(ua), p_aparelho: aparelhoDe(ua), p_navegador: navegadorDe(ua) }) });
+  if (!r.ok) console.error("[lp-leads] evento não gravado", r.status, (await r.text().catch(() => "")).slice(0, 200));
+}
+const veioDaBio = (a: unknown) => !!a && typeof a === "object" && Array.isArray((a as { respostas?: unknown[] }).respostas) &&
+  ((a as { respostas: { pergunta?: string; resposta?: string }[] }).respostas).some((r) => r?.pergunta === "Origem" && /bio do instagram/i.test(String(r?.resposta ?? "")));
+
 // ---------- servidor ----------
 function cors(origem: string | null) {
   const permitido = origem && ORIGENS_PERMITIDAS.includes(origem) ? origem : ORIGENS_PERMITIDAS[0];
@@ -276,6 +312,15 @@ Deno.serve(async (req: Request) => {
   let b: Record<string, unknown>;
   try { b = JSON.parse(bruto); } catch { return json({ ok: false, erro: "json" }, 400, h); }
 
+  // Estatística de visita/clique (link da bio e análise).
+  if (b.acao === "evento") {
+    const pagina = txt(b.pagina, 20), evento = txt(b.evento, 10), alvo = txt(b.alvo, 40) || null;
+    const ok = ["/bio", "/analise"].includes(pagina) && (evento === "visita" || (evento === "clique" && pagina === "/bio" && alvo !== null && ALVOS.includes(alvo)));
+    if (ok && !excedeuConsultas(ip)) await registrarEvento(pagina, evento, evento === "clique" ? alvo : null, req.headers.get("user-agent") ?? "", txt(b.marcacao, 60), txt(b.referencia, 300))
+      .catch((e) => console.error("[lp-leads] evento", String(e).slice(0, 200)));
+    return new Response(null, { status: 204, headers: h });
+  }
+
   // A tela do Pix pergunta de tempos em tempos se o pagamento já caiu.
   if (b.acao === "status_pix") {
     if (excedeuConsultas(ip)) return json({ ok: false, erro: "limite" }, 429, h);
@@ -300,6 +345,7 @@ Deno.serve(async (req: Request) => {
           ...p.nota, "", `Enviado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`].join("\n");
         await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: aberto.id, note_type: "common", params: { text: texto } }]) });
         console.log("[lp-leads] lead reaproveitado", { tipo: p.tipo, leadId: aberto.id });
+        if (veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
         return json({ ok: true }, 200, h);
       }
     }
@@ -327,6 +373,7 @@ Deno.serve(async (req: Request) => {
     await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text: texto } }]) })
       .catch((e) => console.error("[lp-leads] nota falhou", leadId, String(e).slice(0, 200)));
     console.log("[lp-leads] lead criado", { tipo: p.tipo, leadId });
+    if (p.tipo === "visto" && veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
 
     let pix: Awaited<ReturnType<typeof criarPix>> | null = null;
     if (p.tipo === "passaporte" && p.preco && Deno.env.get("MP_ACCESS_TOKEN")) {
