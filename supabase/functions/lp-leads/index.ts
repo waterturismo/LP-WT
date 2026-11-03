@@ -154,6 +154,19 @@ async function confirmarPedido(id: string): Promise<boolean> {
   return true;
 }
 
+// Lead de visto ainda aberto (nem ganho 142 nem perdido 143) desse contato, para reaproveitar em vez de duplicar.
+type LeadBusca = { id: number; name?: string; status_id: number; pipeline_id: number; updated_at?: number; _embedded?: { tags?: { name: string }[] } };
+async function leadVistoAberto(contatoId: number): Promise<LeadBusca | null> {
+  const c = await kommo<{ _embedded?: { leads?: { id: number }[] } }>(`/contacts/${contatoId}?with=leads`);
+  const ids = (c?._embedded?.leads ?? []).map((l) => l.id).slice(-50);
+  if (!ids.length) return null;
+  const r = await kommo<{ _embedded: { leads: LeadBusca[] } }>(`/leads?${ids.map((id) => `filter[id][]=${id}`).join("&")}&limit=50`);
+  const ehVisto = (l: LeadBusca) => normalizar(l.name ?? "").includes("visto") || (l._embedded?.tags ?? []).some((t) => normalizar(t.name).includes("visto"));
+  const abertos = (r?._embedded.leads ?? []).filter((l) => l.status_id !== 142 && l.status_id !== 143 && ehVisto(l));
+  abertos.sort((a, b) => (b.updated_at ?? 0) - (a.updated_at ?? 0));
+  return abertos[0] ?? null;
+}
+
 // Respostas da análise de perfil (opcional), vindas da página de visto.
 function analiseTexto(a: unknown): string[] {
   if (!a || typeof a !== "object") return [];
@@ -277,6 +290,19 @@ Deno.serve(async (req: Request) => {
 
   try {
     const [destino, origemCampo, existente] = await Promise.all([etapaDestino(), campoOrigem(), contatoExistente(p.telefone)]);
+    // Visto: se o contato já tem um lead de visto aberto, a nova análise entra nele como nota (sem criar outro lead).
+    if (p.tipo === "visto" && existente) {
+      const aberto = await leadVistoAberto(existente.id).catch((e) => { console.error("[lp-leads] busca lead aberto", String(e).slice(0, 200)); return null; });
+      if (aberto) {
+        await kommo("/leads", { method: "PATCH", body: JSON.stringify([{ id: aberto.id, tags_to_add: [{ name: ORIGEM }, { name: p.etiqueta }] }]) })
+          .catch((e) => console.error("[lp-leads] etiquetas lead aberto", aberto.id, String(e).slice(0, 200)));
+        const texto = ["NOVO ENVIO PELO SITE — este contato já tinha este lead de visto aberto, então as informações foram anotadas aqui (nenhum lead novo foi criado).", "",
+          ...p.nota, "", `Enviado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`].join("\n");
+        await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: aberto.id, note_type: "common", params: { text: texto } }]) });
+        console.log("[lp-leads] lead reaproveitado", { tipo: p.tipo, leadId: aberto.id });
+        return json({ ok: true }, 200, h);
+      }
+    }
     const contato = existente ? { id: existente.id } : {
       name: p.nome,
       custom_fields_values: [
