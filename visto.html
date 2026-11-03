@@ -25,6 +25,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 @media (max-width: 560px){.vgrid2 > div{grid-column: span 2 !important}}
 </style>
 <style>@media (max-width: 560px){.vgrid2 > div{grid-column: span 2 !important}}</style>
+<style>[hidden]{display:none !important}</style>
 </head>
 <body>
 <div style="font-family: 'DM Sans', system-ui, sans-serif; color: #14202e; background: #f4f7fb; min-height: 100vh">
@@ -167,87 +168,166 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 
   <!-- Contratar -->
   <section id="contratar" style="max-width: 760px; margin: 0 auto; padding: 56px 20px 24px">
-    <div style="font-size: 13px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #1c6fb5; margin-bottom: 10px">Proposta</div>
-    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; color: #0b2340">Solicite sua proposta de assessoria B1/B2</h2>
-    <p style="margin: 0 0 12px; font-size: 17px; line-height: 1.6; color: #44525f">Conte quantas pessoas vão solicitar o visto e deixe seu contato. Em breve um consultor entra em contato com a proposta.</p>
-    <p style="margin: 0 0 28px; display: inline-flex; align-items: center; gap: 10px; background: #fff4e8; color: #0b2340; font-size: 15px; font-weight: 500; padding: 10px 16px; border-radius: 999px">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b35a00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><rect x="3" y="8" width="18" height="4" rx="1"></rect><path d="M12 8v13M19 12v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8"></path><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"></path></svg>
-      A cada 5 solicitantes B1/B2, 1 assessoria é cortesia
-    </p>
-
-    <form id="form-visto" novalidate data-h="1" style="position: relative; background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
-      <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0">
-      <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
-        <legend style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: #0b2340; margin-bottom: 14px; padding: 0">1. Quantas pessoas?</legend>
-        <div style="display: flex; flex-direction: column; gap: 12px">
-          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #e3e9f1; border-radius: 14px">
-            <div style="min-width: 0; flex: 1 1 200px">
-              <div style="font-weight: 700; font-size: 17px; color: #0b2340">Visto B1/B2</div>
-              <div style="font-size: 14px; color: #4a5868; margin-top: 2px">Turismo e negócios</div>
+    <div style="font-size: 13px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #1c6fb5; margin-bottom: 10px">Análise gratuita</div>
+    <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; color: #0b2340">Como está o seu perfil para o visto?</h2>
+    <p style="margin: 0 0 6px; font-size: 17px; line-height: 1.6; color: #44525f">Responda 9 perguntas rápidas e veja, antes de pagar qualquer taxa, os pontos fortes e os pontos de atenção do seu perfil.</p>
+    <p style="margin: 0 0 24px; font-size: 15px; font-weight: 500; color: #b35a00">Gratuito, com resultado na hora.</p>
+    <div id="q-quiz" style="background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px)">
+        <div aria-hidden="true" style="display: flex; gap: 6px"><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span><span class="q-bar" style="flex: 1; height: 4px; border-radius: 4px; background: #e3e9f1"></span></div>
+        <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: 14px"><span style="color: #4a5868"><span id="q-rotulo">Pergunta 1 de 9</span></span><span style="color: #b35a00; font-weight: 700"><span id="q-cat">Trabalho</span></span></div>
+      <div class="q-step" data-s="0">
+        <h3 id="q-t0" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Qual é a sua situação profissional hoje?</h3>
+          <div role="radiogroup" aria-labelledby="q-t0" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>CLT ou servidor público</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Empresário ou autônomo com renda comprovada</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Aposentado ou pensionista</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Estudante</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="4" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Autônomo sem comprovação fácil de renda</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="0" data-o="5" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sem trabalho no momento</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"></div>
+      </div>
+      <div class="q-step" data-s="1" hidden>
+        <h3 id="q-t1" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Há quanto tempo você está nessa situação profissional?</h3>
+          <div role="radiogroup" aria-labelledby="q-t1" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="1" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Menos de 6 meses</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="1" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Entre 6 meses e 1 ano</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="1" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Entre 1 e 3 anos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="1" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Mais de 3 anos</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="2" hidden>
+        <h3 id="q-t2" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Qual é a sua renda mensal comprovável?</h3>
+          <div role="radiogroup" aria-labelledby="q-t2" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="2" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Até R$ 2.000</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="2" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Entre R$ 2.000 e R$ 5.000</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="2" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Entre R$ 5.000 e R$ 10.000</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="2" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Acima de R$ 10.000</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="3" hidden>
+        <h3 id="q-t3" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Qual é o seu grau de escolaridade?</h3>
+          <div role="radiogroup" aria-labelledby="q-t3" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="3" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Ensino médio incompleto ou menos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="3" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Ensino médio completo</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="3" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Curso técnico ou tecnólogo</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="3" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Ensino superior completo ou cursando</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="3" data-o="4" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Pós-graduação, MBA, mestrado ou doutorado</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="4" hidden>
+        <h3 id="q-t4" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Qual destas opções descreve sua situação familiar?</h3>
+          <div role="radiogroup" aria-labelledby="q-t4" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="4" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Casado(a) ou em união estável, com filhos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="4" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Casado(a) ou em união estável, sem filhos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="4" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Solteiro(a), divorciado(a) ou viúvo(a), com filhos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="4" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Solteiro(a), divorciado(a) ou viúvo(a), sem filhos</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="5" hidden>
+        <h3 id="q-t5" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Você já viajou para fora do Brasil?</h3>
+          <div role="radiogroup" aria-labelledby="q-t5" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="5" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, já fui aos Estados Unidos</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="5" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, para Europa, Ásia ou Oceania</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="5" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, para outros países da América</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="5" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Nunca saí do Brasil</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="6" hidden>
+        <h3 id="q-t6" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Você já teve algum visto negado?</h3>
+          <div role="radiogroup" aria-labelledby="q-t6" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="6" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Nunca tive visto negado</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="6" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, de outro país (não dos EUA)</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="6" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, o americano, 1 vez</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="6" data-o="3" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Sim, o americano, 2 vezes ou mais</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="7" hidden>
+        <h3 id="q-t7" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Quantas pessoas vão solicitar o visto?</h3>
+          <p style="margin: 0 0 16px; font-size: 15px; color: #4a5868">Conte você também.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #e3e9f1; border-radius: 14px; background: #ffffff">
+              <div style="min-width: 0; flex: 1 1 200px"><div style="font-weight: 700; font-size: 17px; color: #0b2340">Visto B1/B2</div><div style="font-size: 14px; color: #4a5868; margin-top: 2px">Turismo e negócios</div></div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <button type="button" data-step="B" data-d="-1" aria-label="Diminuir Visto B1/B2" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">−</button>
+                <span aria-live="polite" style="min-width: 32px; text-align: center; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 24px; color: #0b2340"><span id="n-B">1</span></span>
+                <button type="button" data-step="B" data-d="1" aria-label="Aumentar Visto B1/B2" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">+</button>
+              </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px">
-              <button type="button" data-step="B" data-d="-1" aria-label="Diminuir Visto B1/B2" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">−</button>
-              <span aria-live="polite" style="min-width: 32px; text-align: center; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 24px; color: #0b2340"><span id="n-B">1</span></span>
-              <button type="button" data-step="B" data-d="1" aria-label="Aumentar Visto B1/B2" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">+</button>
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #e3e9f1; border-radius: 14px; background: #ffffff">
+              <div style="min-width: 0; flex: 1 1 200px"><div style="font-weight: 700; font-size: 17px; color: #0b2340">B1/B2 para babá</div><div style="font-size: 14px; color: #4a5868; margin-top: 2px">Babá que acompanha a família</div></div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <button type="button" data-step="N" data-d="-1" aria-label="Diminuir B1/B2 para babá" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">−</button>
+                <span aria-live="polite" style="min-width: 32px; text-align: center; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 24px; color: #0b2340"><span id="n-N">0</span></span>
+                <button type="button" data-step="N" data-d="1" aria-label="Aumentar B1/B2 para babá" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">+</button>
+              </div>
             </div>
           </div>
-          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #e3e9f1; border-radius: 14px">
-            <div style="min-width: 0; flex: 1 1 200px">
-              <div style="font-weight: 700; font-size: 17px; color: #0b2340">B1/B2 para babá</div>
-              <div style="font-size: 14px; color: #4a5868; margin-top: 2px">Babá que acompanha a família</div>
+          <p class="err" id="q-errqtd" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe pelo menos 1 pessoa.</p>
+          <div style="margin-top: 20px"><button type="button" id="q-continuar" style="font: inherit; cursor: pointer; width: 100%; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Continuar</button></div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <div class="q-step" data-s="8" hidden>
+        <h3 id="q-t8" style="margin: 22px 0 20px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Você tem parentes próximos morando nos EUA?</h3>
+          <div role="radiogroup" aria-labelledby="q-t8" style="display: flex; flex-direction: column; gap: 10px">
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="8" data-o="0" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Não tenho</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="8" data-o="1" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Tenho, com green card ou cidadania</span></button>
+            <button type="button" role="radio" aria-checked="false" class="q-op" data-q="8" data-o="2" style="font: inherit; cursor: pointer; width: 100%; text-align: left; min-height: 60px; padding: 16px 18px; border-radius: 14px; display: flex; align-items: center; gap: 14px; font-size: 16px; line-height: 1.4; color: #14202e; border: 1.5px solid #e3e9f1; background: #ffffff"><span aria-hidden="true" class="q-dot" style="width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; border: 2px solid #9fb2c8; background: #ffffff"></span><span>Tenho, sem documentação ou não sei a situação</span></button>
+          </div>
+        <div style="margin-top: 14px; min-height: 44px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </div>
+      <form class="q-step" data-s="9" id="form-visto" novalidate hidden style="position: relative">
+        <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0">
+        <h3 style="margin: 22px 0 6px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(24px, 3.2vw, 30px); line-height: 1.2; color: #0b2340">Para quem é esta análise?</h3>
+        <p style="margin: 0 0 20px; font-size: 15px; color: #4a5868">O resultado aparece na hora, nesta tela, e nossa equipe entra em contato com a sua proposta.</p>
+        <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="min-width: 0">
+              <label for="q-nome" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Nome completo</label>
+              <input id="q-nome" name="nome" type="text" placeholder="Seu nome" autocomplete="name" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
+              <p class="err" data-err="nome" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe seu nome completo.</p>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px">
-              <button type="button" data-step="N" data-d="-1" aria-label="Diminuir B1/B2 para babá" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">−</button>
-              <span aria-live="polite" style="min-width: 32px; text-align: center; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 24px; color: #0b2340"><span id="n-N">0</span></span>
-              <button type="button" data-step="N" data-d="1" aria-label="Aumentar B1/B2 para babá" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">+</button>
+            <div style="min-width: 0">
+              <label for="q-tel" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">WhatsApp com DDD</label>
+              <input id="q-tel" name="tel" type="tel" placeholder="(00) 00000-0000" inputmode="tel" maxlength="15" autocomplete="tel" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
+              <p class="err" data-err="tel" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um número com DDD.</p>
             </div>
+            <div style="min-width: 0">
+              <label for="q-email" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">E-mail</label>
+              <input id="q-email" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
+              <p class="err" data-err="email" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um e-mail válido.</p>
+            </div>
+          <div>
+            <label style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.55; color: #44525f; cursor: pointer"><input type="checkbox" id="q-consent" style="width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: #1c6fb5"><span>Concordo em receber contato da Water Turismo sobre esta análise e com o uso dos meus dados conforme a <a href="privacidade.html" style="font-weight: 700">Política de Privacidade</a>.</span></label>
+            <p class="err" data-err="consent" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">É preciso autorizar o contato para continuar.</p>
           </div>
         </div>
-        <p class="err" data-err="qtd" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe pelo menos 1 solicitante.</p>
-      </fieldset>
+        <div style="margin-top: 20px"><button type="submit" id="q-enviar" style="font: inherit; cursor: pointer; width: 100%; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Ver minha análise</button></div>
+        <div style="margin-top: 14px"><button type="button" class="q-voltar" style="font: inherit; cursor: pointer; background: none; border: 0; color: #1c6fb5; font-size: 15px; font-weight: 500; padding: 10px 4px; min-height: 44px">← Voltar</button></div>
+      </form>
+    </div>
 
-      <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
-        <legend style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: #0b2340; margin-bottom: 14px; padding: 0">2. Seu contato</legend>
-        <div class="vgrid2" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
-        <div style="grid-column: span 2; min-width: 0">
-          <label for="v-nome" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Nome completo</label>
-          <input id="v-nome" name="nome" type="text" placeholder="Seu nome" autocomplete="name" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="nome" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe seu nome completo.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-email" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">E-mail</label>
-          <input id="v-email" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="email" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um e-mail válido.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-tel" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">WhatsApp</label>
-          <input id="v-tel" name="tel" type="tel" placeholder="(00) 00000-0000" inputmode="tel" maxlength="15" autocomplete="tel" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="tel" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um número com DDD.</p>
-        </div>
-        </div>
-      </fieldset>
-
-      <div>
-        <label style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.55; color: #44525f; cursor: pointer">
-          <input type="checkbox" id="v-consent" name="consent" style="width: 22px; height: 22px; margin: 1px 0 0; flex-shrink: 0; accent-color: #1c6fb5">
-          <span>Autorizo a Water Turismo a entrar em contato comigo e a usar estes dados para enviar a proposta, conforme a Lei Geral de Proteção de Dados (Lei 13.709/2018) (veja a <a href="privacidade.html" style="font-weight: 700">Política de Privacidade</a>).</span>
-        </label>
-        <p class="err" data-err="consent" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">É preciso autorizar o contato para continuar.</p>
+    <div id="q-resultado" hidden role="status" style="background: #ffffff; border: 2px solid #e8892a; border-radius: 22px; padding: clamp(24px, 5vw, 44px)">
+      <div style="font-size: 13px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #1c6fb5">Sua análise, <span id="r-nome"></span></div>
+      <h3 style="margin: 10px 0 10px; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; font-size: clamp(26px, 3.6vw, 34px); line-height: 1.15; color: #0b2340"><span id="r-titulo"></span></h3>
+      <p style="margin: 0; font-size: 17px; line-height: 1.65; color: #44525f"><span id="r-texto"></span></p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; margin-top: 22px; font-size: 15px; line-height: 1.5; color: #14202e">
+        <div id="r-boxf"><div style="background: #f4f7fb; border-radius: 14px; padding: 18px"><div style="font-weight: 700; color: #0b2340; margin-bottom: 10px">Pontos a seu favor</div><ul id="r-fortes" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px"></ul></div></div>
+        <div id="r-boxa"><div style="background: #fff4e8; border-radius: 14px; padding: 18px"><div style="font-weight: 700; color: #0b2340; margin-bottom: 10px">Pontos de atenção</div><ul id="r-atencao" style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px"></ul></div></div>
       </div>
-
-      <p id="v-alert" role="alert" hidden style="margin: 0; padding: 12px 16px; border-radius: 12px; background: #fdecea; font-size: 15px; font-weight: 500; color: #8c1d18">Confira os campos destacados antes de enviar.</p>
-
-      <button type="submit" id="v-btn" class="wt-btn" style="font: inherit; cursor: pointer; align-self: stretch; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Solicitar proposta</button>
-      <p style="margin: -12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868; text-align: center">Sem compromisso. Um consultor envia a proposta pelo WhatsApp ou e-mail.</p>
-    </form>
-
-    <div id="v-sucesso" hidden role="status" style="background: #ffffff; border: 2px solid #e8892a; border-radius: 22px; padding: clamp(28px, 5vw, 48px); text-align: center">
-      <div style="width: 64px; height: 64px; border-radius: 50%; background: #0b2340; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e8892a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+      <div style="margin-top: 24px; padding: 18px 20px; background: #0b2340; color: #ffffff; border-radius: 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px">
+        <span style="flex: 1 1 260px; font-size: 16px; line-height: 1.5">Recebemos seus dados. Um consultor da Water Turismo vai entrar em contato com a sua proposta.</span>
+        <a class="wt-btn" href="https://wa.me/5564992989594?text=Ol%C3%A1%2C%20acabei%20de%20fazer%20a%20an%C3%A1lise%20de%20perfil%20para%20o%20visto%20americano" style="background: #e8892a; color: #0b2340; font-weight: 700; font-size: 15px; text-decoration: none; padding: 14px 22px; border-radius: 999px; min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>Falar agora</a>
       </div>
-      <h3 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 34px); color: #0b2340">Pedido recebido, <span id="vs-nome"></span>!</h3>
-      <p style="margin: 14px auto 0; font-size: 17px; line-height: 1.65; color: #44525f; max-width: 520px">Em breve um consultor da Water Turismo entrará em contato com a sua proposta de assessoria para <strong><span id="vs-qtd"></span></strong>.</p>
-        </div>
+      <p style="margin: 18px 0 0; font-size: 13px; line-height: 1.6; color: #4a5868">Esta análise é uma orientação inicial, baseada nos critérios que costumamos observar no atendimento. Ela não garante aprovação: a concessão do visto é decisão exclusiva do Consulado dos Estados Unidos.</p>
+    </div>
+
+    <p style="margin: 16px 0 0; display: inline-flex; align-items: center; gap: 10px; background: #fff4e8; color: #0b2340; font-size: 14px; font-weight: 500; padding: 10px 16px; border-radius: 999px">A cada 5 solicitantes B1/B2, 1 assessoria é cortesia</p>
   </section>
 
   <!-- Aviso + CTA final -->
@@ -293,39 +373,85 @@ function enviarWhatsApp(titulo, dados) {
 </script>
 
 <script>
-/* ==== CONFIGURAÇÃO ====
-   ENDPOINT_VISTO: URL que recebe os pedidos de proposta (integração com o Kommo).
-   Enquanto estiver vazio, o pedido é enviado pelo WhatsApp da agência. */
+var PERGUNTAS = [{"id": "trabalho", "cat": "Trabalho", "q": "Qual é a sua situação profissional hoje?", "ops": [["CLT ou servidor público", 3, "forte"], ["Empresário ou autônomo com renda comprovada", 3, "forte"], ["Aposentado ou pensionista", 3, "forte"], ["Estudante", 1, "Estudantes costumam precisar mostrar quem custeia a viagem e o vínculo com os estudos no Brasil."], ["Autônomo sem comprovação fácil de renda", 1, "Sem comprovação formal de renda, é importante reunir outros documentos que mostrem sua atividade."], ["Sem trabalho no momento", 0, "Sem vínculo profissional atual, o vínculo com o Brasil e quem custeia a viagem precisam ficar bem claros."]]}, {"id": "tempo", "cat": "Estabilidade", "q": "Há quanto tempo você está nessa situação profissional?", "ops": [["Menos de 6 meses", 0, "Pouco tempo na situação atual: documentos que mostrem estabilidade ajudam muito."], ["Entre 6 meses e 1 ano", 1, ""], ["Entre 1 e 3 anos", 2, "forte"], ["Mais de 3 anos", 3, "forte"]]}, {"id": "renda", "cat": "Renda", "q": "Qual é a sua renda mensal comprovável?", "ops": [["Até R$ 2.000", 0, "A renda precisa ser compatível com a viagem; se outra pessoa vai custear, isso deve ficar documentado."], ["Entre R$ 2.000 e R$ 5.000", 1, ""], ["Entre R$ 5.000 e R$ 10.000", 2, "forte"], ["Acima de R$ 10.000", 3, "forte"]]}, {"id": "escolaridade", "cat": "Escolaridade", "q": "Qual é o seu grau de escolaridade?", "ops": [["Ensino médio incompleto ou menos", 0, ""], ["Ensino médio completo", 1, ""], ["Curso técnico ou tecnólogo", 1, ""], ["Ensino superior completo ou cursando", 2, ""], ["Pós-graduação, MBA, mestrado ou doutorado", 3, ""]]}, {"id": "familia", "cat": "Família", "q": "Qual destas opções descreve sua situação familiar?", "ops": [["Casado(a) ou em união estável, com filhos", 3, "forte"], ["Casado(a) ou em união estável, sem filhos", 2, ""], ["Solteiro(a), divorciado(a) ou viúvo(a), com filhos", 2, ""], ["Solteiro(a), divorciado(a) ou viúvo(a), sem filhos", 1, ""]]}, {"id": "viagens", "cat": "Viagens", "q": "Você já viajou para fora do Brasil?", "ops": [["Sim, já fui aos Estados Unidos", 3, "forte"], ["Sim, para Europa, Ásia ou Oceania", 2, "forte"], ["Sim, para outros países da América", 1, ""], ["Nunca saí do Brasil", 0, "Não ter viagens internacionais não impede o visto, mas a entrevista precisa ser bem preparada."]]}, {"id": "negativa", "cat": "Histórico consular", "q": "Você já teve algum visto negado?", "ops": [["Nunca tive visto negado", 3, "forte"], ["Sim, de outro país (não dos EUA)", 1, "Uma negativa de outro país deve ser informada corretamente no formulário."], ["Sim, o americano, 1 vez", 0, "Antes de reaplicar, é essencial entender o que mudou desde a negativa anterior."], ["Sim, o americano, 2 vezes ou mais", -1, "Com mais de uma negativa, vale uma análise detalhada antes de pagar uma nova taxa."]]}, {"id": "pessoas", "cat": "Companhia", "q": "Quantas pessoas vão solicitar o visto?", "tipo": "qtd"}, {"id": "parentes", "cat": "Parentes nos EUA", "q": "Você tem parentes próximos morando nos EUA?", "ops": [["Não tenho", 2, ""], ["Tenho, com green card ou cidadania", 1, "Parentes nos EUA devem ser informados com transparência no formulário e na entrevista."], ["Tenho, sem documentação ou não sei a situação", 0, "Esse ponto costuma ser observado pelo consulado; é importante tratá-lo com cuidado e transparência."]]}];
+var FORTES = {"trabalho": "Vínculo profissional sólido", "tempo": "Estabilidade na situação profissional", "renda": "Renda compatível com viagens internacionais", "familia": "Vínculos familiares no Brasil", "viagens": "Histórico de viagens internacionais", "negativa": "Histórico consular sem negativas"};
+var AVISO = "Esta análise é uma orientação inicial, baseada nos critérios que costumamos observar no atendimento. Ela não garante aprovação: a concessão do visto é decisão exclusiva do Consulado dos Estados Unidos.";
+function avaliar(resp) {
+  var pts = 0, max = 0, fortes = [], atencao = [], lista = [];
+  PERGUNTAS.forEach(function (p, i) {
+    if (!p.ops) return;
+    var o = p.ops[resp[i]]; if (!o) return;
+    var top = Math.max.apply(null, p.ops.map(function (x) { return x[1]; }));
+    pts += o[1]; max += top;
+    lista.push({ pergunta: p.cat, resposta: o[0] });
+    if (o[2] === 'forte' && FORTES[p.id]) fortes.push(FORTES[p.id]);
+    else if (o[2] && o[2] !== 'forte') atencao.push(o[2]);
+  });
+  var neg = resp[6] === 3;
+  var r = pts / max, nivel;
+  if (neg || r < 0.45) nivel = 3; else if (r < 0.75 || atencao.length >= 3) nivel = 2; else nivel = 1;
+  var perfis = {
+    1: ['Seu perfil tem bons vínculos', 'Pelas suas respostas, você reúne vários dos pontos que costumam pesar a favor na análise consular. Com documentação organizada e uma boa preparação para a entrevista, você chega bem preparado.'],
+    2: ['Seu perfil tem pontos de atenção', 'Você tem pontos positivos, mas alguns aspectos merecem cuidado na montagem do formulário e na preparação para a entrevista. É exatamente aí que uma assessoria faz diferença.'],
+    3: ['Seu perfil pede uma preparação cuidadosa', 'Alguns pontos do seu perfil costumam ser observados com atenção pelo consulado. Antes de pagar a taxa, vale uma conversa com a nossa equipe para avaliar o melhor momento e a melhor forma de aplicar.']
+  };
+  return { nivel: nivel, titulo: perfis[nivel][0], texto: perfis[nivel][1], fortes: fortes, atencao: atencao, respostas: lista };
+}
+
+/* ==== CONFIGURAÇÃO ==== URL que recebe os pedidos (função lp-leads no Supabase → Kommo). */
 var ENDPOINT_VISTO = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1/lp-leads';
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var form = $('form-visto'); if (!form) return;
+  if (!$('q-quiz')) return;
   var dig = function (s) { return String(s || '').replace(/\D/g, ''); };
-  var st = { B: 1, N: 0 };
-  function render() { $('n-B').textContent = st.B; $('n-N').textContent = st.N; }
-  document.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { var k = b.dataset.step; st[k] = Math.max(0, Math.min(20, st[k] + (+b.dataset.d))); render(); }); });
-  $('v-tel').addEventListener('input', function (e) { var d = dig(e.target.value).slice(0, 11); e.target.value = d.length <= 10 ? d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2') : d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2'); });
-  function v(k) { return ($('v-' + k).value || '').trim(); }
-  form.addEventListener('submit', function (ev) {
+  var st = { s: 0, resp: {}, B: 1, N: 0 };
+  var steps = document.querySelectorAll('.q-step'), bars = document.querySelectorAll('.q-bar');
+  function mostrar() {
+    steps.forEach(function (el) { el.hidden = +el.dataset.s !== st.s; });
+    bars.forEach(function (b, i) { b.style.background = i < st.s ? '#e8892a' : (i === st.s ? '#f0b97a' : '#e3e9f1'); });
+    $('q-rotulo').textContent = st.s < 9 ? 'Pergunta ' + (st.s + 1) + ' de 9' : 'Última etapa';
+    $('q-cat').textContent = st.s < 9 ? PERGUNTAS[st.s].cat : 'Seus dados';
+    document.querySelectorAll('.q-op').forEach(function (b) {
+      var on = st.resp[+b.dataset.q] === +b.dataset.o;
+      b.setAttribute('aria-checked', on ? 'true' : 'false'); b.style.borderColor = on ? '#e8892a' : '#e3e9f1'; b.style.background = on ? '#fff4e8' : '#ffffff';
+      var d = b.querySelector('.q-dot'); d.style.borderColor = on ? '#e8892a' : '#9fb2c8'; d.style.background = on ? '#e8892a' : '#ffffff';
+    });
+    $('n-B').textContent = st.B; $('n-N').textContent = st.N;
+    var alvo = document.querySelector('.q-step[data-s="' + st.s + '"] h3'); if (alvo && st.inicio) { alvo.setAttribute('tabindex', '-1'); alvo.focus({ preventScroll: true }); }
+  }
+  function ir(n) { st.s = n; st.inicio = true; mostrar(); var top = $('contratar').getBoundingClientRect().top; if (top < 0 || top > window.innerHeight * 0.6) $('contratar').scrollIntoView({ behavior: 'smooth' }); }
+  document.querySelectorAll('.q-op').forEach(function (b) { b.addEventListener('click', function () { st.resp[+b.dataset.q] = +b.dataset.o; mostrar(); setTimeout(function () { ir(Math.min(+b.dataset.q + 1, 9)); }, 180); }); });
+  document.querySelectorAll('.q-voltar').forEach(function (b) { b.addEventListener('click', function () { ir(Math.max(0, st.s - 1)); }); });
+  document.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { var k = b.dataset.step; st[k] = Math.max(0, Math.min(20, st[k] + (+b.dataset.d))); mostrar(); }); });
+  $('q-continuar').addEventListener('click', function () { var bad = st.B + st.N < 1; $('q-errqtd').hidden = !bad; if (!bad) ir(8); });
+  $('q-tel').addEventListener('input', function (e) { var d = dig(e.target.value).slice(0, 11); e.target.value = d.length <= 10 ? d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2') : d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2'); });
+  function v(k) { return ($('q-' + k).value || '').trim(); }
+  $('form-visto').addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')), tel: dig(v('tel')).length < 10, consent: !$('v-consent').checked, qtd: st.B + st.N < 1 };
+    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, tel: dig(v('tel')).length < 10, email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')), consent: !$('q-consent').checked };
     var algum = false;
-    Object.keys(e).forEach(function (k) { var m = form.querySelector('[data-err="' + k + '"]'); if (m) m.hidden = !e[k]; var inp = $('v-' + k); if (inp && inp.type !== 'checkbox') inp.style.borderColor = e[k] ? '#b3261e' : '#c9d6e5'; if (e[k]) algum = true; });
-    $('v-alert').hidden = !algum;
-    if (algum) { var f1 = form.querySelector('.err:not([hidden])'); if (f1) f1.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
-    var partes = []; if (st.B) partes.push(st.B + ' B1/B2'); if (st.N) partes.push(st.N + ' babá');
-    var dados = { tipo: 'visto', site_web: ($('site_web') || {}).value || '', servico: 'Proposta assessoria visto americano B1/B2', qtd_b1b2: st.B, qtd_baba: st.N, nome: v('nome'), email: v('email'), whatsapp: v('tel'),
-      kommo: { funil: 'VENDAS 1', etapa: 'RESERVA' }, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
-    function ok() { $('vs-nome').textContent = v('nome').split(/\s+/)[0]; $('vs-qtd').textContent = partes.join(' + '); form.hidden = true; $('v-sucesso').hidden = false; $('v-sucesso').scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    if (!ENDPOINT_VISTO) { enviarWhatsApp('Proposta visto B1/B2', dados); ok(); return; }
-    var btn = $('v-btn'); btn.disabled = true; btn.textContent = 'Enviando...';
+    Object.keys(e).forEach(function (k) { var m = document.querySelector('[data-err="' + k + '"]'); if (m) m.hidden = !e[k]; var inp = $('q-' + k); if (inp && inp.type !== 'checkbox') inp.style.borderColor = e[k] ? '#b3261e' : '#c9d6e5'; if (e[k]) algum = true; });
+    if (algum) return;
+    var r = avaliar(st.resp);
+    var dados = { tipo: 'visto', site_web: ($('site_web') || {}).value || '', qtd_b1b2: st.B, qtd_baba: st.N, nome: v('nome'), email: v('email'), whatsapp: v('tel'), consentimento_lgpd: true,
+      analise: { perfil: r.titulo, respostas: r.respostas, atencao: r.atencao }, enviado_em: new Date().toISOString() };
+    function mostrarResultado() {
+      $('r-nome').textContent = v('nome').split(/\s+/)[0]; $('r-titulo').textContent = r.titulo; $('r-texto').textContent = r.texto;
+      function preencher(id, lista, cor, simb) { var ul = $(id); ul.innerHTML = ''; lista.forEach(function (t) { var li = document.createElement('li'); li.setAttribute('style', 'display: flex; gap: 10px; align-items: flex-start'); var s = document.createElement('span'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('style', 'color: ' + cor + '; font-weight: 700'); s.textContent = simb; var t2 = document.createElement('span'); t2.textContent = t; li.appendChild(s); li.appendChild(t2); ul.appendChild(li); }); }
+      preencher('r-fortes', r.fortes, '#1c6fb5', '✓'); preencher('r-atencao', r.atencao, '#b35a00', '!');
+      $('r-boxf').hidden = !r.fortes.length; $('r-boxa').hidden = !r.atencao.length;
+      $('q-quiz').hidden = true; $('q-resultado').hidden = false; $('q-resultado').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    var btn = $('q-enviar'); btn.disabled = true; btn.textContent = 'Analisando...';
+    var fallback = function () { var d2 = { servico: 'Análise de perfil — visto B1/B2', perfil: r.titulo, b1b2: st.B, baba: st.N, nome: dados.nome, whatsapp: dados.whatsapp, email: dados.email };
+      r.respostas.forEach(function (x) { d2[x.pergunta] = x.resposta; }); enviarWhatsApp('Análise de perfil visto B1/B2', d2); };
     fetch(ENDPOINT_VISTO, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); ok(); })
-      .catch(function () { enviarWhatsApp('Proposta visto B1/B2', dados); ok(); });
+      .then(function (res) { if (!res.ok) throw new Error(res.status); })
+      .catch(fallback)
+      .then(mostrarResultado);
   });
-  // Link pré-preenchido pela equipe: ?b1b2=4&baba=1
   try { var q = new URLSearchParams(location.search), qb = parseInt(q.get('b1b2'), 10), qn = parseInt(q.get('baba'), 10); if (qb >= 0 && qb <= 20) st.B = qb; if (qn >= 0 && qn <= 20) st.N = qn; } catch (e) {}
-  render();
+  mostrar();
 })();
 </script>
 </body>
