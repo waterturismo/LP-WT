@@ -1,10 +1,11 @@
 // Recebe os formulários da LP Water Turismo (visto, passaporte, Viagem Programada)
-// e cria o lead no Kommo: funil VENDAS 1, etapa RESERVA, com contato, etiquetas e nota.
+// e cria o lead no Kommo: funil VENDAS 1 — visto em PREPARAR PROPOSTA, os demais em RESERVA — com contato, etiquetas e nota.
 // O token do Kommo fica no segredo KOMMO_TOKEN do Supabase — nunca no site.
 
 const KOMMO_SUBDOMINIO = Deno.env.get("KOMMO_SUBDOMINIO") ?? "waterturismo";
 const FUNIL = Deno.env.get("LP_KOMMO_FUNIL") ?? "VENDAS 1";
 const ETAPA = Deno.env.get("LP_KOMMO_ETAPA") ?? "RESERVA";
+const ETAPA_VISTO = Deno.env.get("LP_KOMMO_ETAPA_VISTO") ?? "PREPARAR PROPOSTA"; // análise/proposta de visto; se não existir, cai em RESERVA
 const ETAPA_PAGO = Deno.env.get("LP_KOMMO_ETAPA_PAGO") ?? "PAGO"; // se não existir no funil, o lead fica onde está e recebe só a nota
 const ORIGEM = "Site Water Turismo";
 const ORIGENS_PERMITIDAS = [
@@ -59,10 +60,13 @@ async function kommo<T>(caminho: string, init?: RequestInit): Promise<T | null> 
 type Funil = { id: number; name: string; _embedded: { statuses: { id: number; name: string }[] } };
 type Campo = { id: number; name: string; type: string; enums?: { id: number; value: string }[] | null };
 
-async function etapaDestino() {
+async function etapaDestino(nomeEtapa = ETAPA) {
   const funis = await kommo<{ _embedded: { pipelines: Funil[] } }>("/leads/pipelines");
   const funil = funis?._embedded.pipelines.find((p) => normalizar(p.name) === normalizar(FUNIL));
   if (!funil) throw new Error(`Funil "${FUNIL}" não encontrado`);
+  const preferida = funil._embedded.statuses.find((s) => normalizar(s.name) === normalizar(nomeEtapa));
+  if (preferida) return { pipeline_id: funil.id, status_id: preferida.id };
+  if (nomeEtapa !== ETAPA) console.error(`[lp-leads] etapa "${nomeEtapa}" não encontrada em "${FUNIL}"; usando "${ETAPA}"`);
   const etapa = funil._embedded.statuses.find((s) => normalizar(s.name) === normalizar(ETAPA));
   if (!etapa) throw new Error(`Etapa "${ETAPA}" não encontrada em "${FUNIL}"`);
   return { pipeline_id: funil.id, status_id: etapa.id };
@@ -334,7 +338,7 @@ Deno.serve(async (req: Request) => {
   if (typeof p === "string") return json({ ok: false, erro: `campo inválido: ${p}` }, 422, h);
 
   try {
-    const [destino, origemCampo, existente] = await Promise.all([etapaDestino(), campoOrigem(), contatoExistente(p.telefone)]);
+    const [destino, origemCampo, existente] = await Promise.all([etapaDestino(p.tipo === "visto" ? ETAPA_VISTO : ETAPA), campoOrigem(), contatoExistente(p.telefone)]);
     // Visto: se o contato já tem um lead de visto aberto, a nova análise entra nele como nota (sem criar outro lead).
     if (p.tipo === "visto" && existente) {
       const aberto = await leadVistoAberto(existente.id).catch((e) => { console.error("[lp-leads] busca lead aberto", String(e).slice(0, 200)); return null; });
