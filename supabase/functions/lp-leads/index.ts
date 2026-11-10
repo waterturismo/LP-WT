@@ -171,12 +171,19 @@ async function leadVistoAberto(contatoId: number): Promise<LeadBusca | null> {
   return abertos[0] ?? null;
 }
 
-// Respostas da análise de perfil (opcional), vindas da página de visto.
+// Respostas da análise de perfil (opcional), vindas da página de visto, agrupadas em blocos na nota.
 function analiseTexto(a: unknown): string[] {
   if (!a || typeof a !== "object") return [];
-  const o = a as Record<string, unknown>, out: string[] = ["", "RESPOSTAS DA ANÁLISE DE PERFIL (o cliente não viu resultado — analisar e retornar pelo WhatsApp):"];
-  if (Array.isArray(o.respostas)) for (const r of o.respostas.slice(0, 12)) {
-    if (r && typeof r === "object") { const x = r as Record<string, unknown>; out.push(`• ${txt(x.pergunta, 40)}: ${txt(x.resposta, 80)}`); }
+  const o = a as Record<string, unknown>;
+  if (!Array.isArray(o.respostas)) return [];
+  const out: string[] = ["", "RESPOSTAS DA ANÁLISE DE PERFIL (o cliente não viu resultado — analisar e retornar pelo WhatsApp)"];
+  let grupoAtual = "";
+  for (const r of o.respostas.slice(0, 50)) {
+    if (!r || typeof r !== "object") continue;
+    const x = r as Record<string, unknown>;
+    const grupo = txt(x.grupo, 30) || "Respostas";
+    if (grupo !== grupoAtual) { out.push("", grupo.toUpperCase()); grupoAtual = grupo; }
+    out.push(`• ${txt(x.pergunta, 40)}: ${txt(x.resposta, 200)}`);
   }
   return out.length > 2 ? out : [];
 }
@@ -312,7 +319,7 @@ Deno.serve(async (req: Request) => {
 
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
   const bruto = await req.text();
-  if (bruto.length > 12000) return json({ ok: false, erro: "tamanho" }, 413, h);
+  if (bruto.length > 20000) return json({ ok: false, erro: "tamanho" }, 413, h);
   let b: Record<string, unknown>;
   try { b = JSON.parse(bruto); } catch { return json({ ok: false, erro: "json" }, 400, h); }
 
