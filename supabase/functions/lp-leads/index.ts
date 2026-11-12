@@ -6,7 +6,6 @@ const KOMMO_SUBDOMINIO = Deno.env.get("KOMMO_SUBDOMINIO") ?? "waterturismo";
 const FUNIL = Deno.env.get("LP_KOMMO_FUNIL") ?? "VENDAS 1";
 const ETAPA = Deno.env.get("LP_KOMMO_ETAPA") ?? "RESERVA";
 const ETAPA_VISTO = Deno.env.get("LP_KOMMO_ETAPA_VISTO") ?? "PREPARAR PROPOSTA"; // análise/proposta de visto; se não existir, cai em RESERVA
-const ETAPA_PAGO = Deno.env.get("LP_KOMMO_ETAPA_PAGO") ?? "PAGO"; // se não existir no funil, o lead fica onde está e recebe só a nota
 const ORIGEM = "Site Water Turismo";
 const ORIGENS_PERMITIDAS = [
   "https://waterturismo.com.br",
@@ -93,69 +92,72 @@ async function contatoExistente(tel: string) {
     f.field_code === "PHONE" && f.values.some((v) => chaveTel(String(v.value)) === alvo)));
 }
 
-async function etapaPago() {
-  const funis = await kommo<{ _embedded: { pipelines: Funil[] } }>("/leads/pipelines");
-  const funil = funis?._embedded.pipelines.find((p) => normalizar(p.name) === normalizar(FUNIL));
-  const etapa = funil?._embedded.statuses.find((s) => normalizar(s.name) === normalizar(ETAPA_PAGO));
-  return funil && etapa ? { pipeline_id: funil.id, status_id: etapa.id } : null;
-}
-
-// ---------- Mercado Pago (Pix) ----------
-// O token fica no segredo MP_ACCESS_TOKEN do Supabase. Sem ele, o site segue sem Pix (o consultor cobra depois).
-async function mp<T>(caminho: string, init?: RequestInit & { idem?: string }): Promise<T> {
-  const token = Deno.env.get("MP_ACCESS_TOKEN");
-  if (!token) throw new Error("MP_ACCESS_TOKEN não configurado");
-  const r = await fetch(`https://api.mercadopago.com${caminho}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...(init?.idem ? { "X-Idempotency-Key": init.idem } : {}) },
-    signal: AbortSignal.timeout(10000),
+// ---------- Asaas (Pix) ----------
+// A chave fica no HUB (Integrações › Pagamentos), na tabela integracao_asaas deste mesmo banco — nunca no site.
+// A cobrança é registrada em "cobrancas" (origem "site"): o aviso de Pix pago chega ao HUB, que confere no Asaas,
+// cria a nota, preenche o grupo PAGAMENTO e move o lead para a etapa PAGO. Sem a chave, o site segue sem Pix.
+const SB_URL = Deno.env.get("SUPABASE_URL")!, SB_CHAVE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+async function banco<T>(caminho: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/${caminho}`, {
+    ...init, signal: AbortSignal.timeout(8000),
+    headers: { apikey: SB_CHAVE, Authorization: `Bearer ${SB_CHAVE}`, "Content-Type": "application/json", Prefer: "return=representation", ...(init?.headers ?? {}) },
   });
-  if (!r.ok) throw new Error(`MP ${r.status} em ${caminho}: ${(await r.text().catch(() => "")).slice(0, 300)}`);
+  if (!r.ok) throw new Error(`banco ${r.status}: ${(await r.text().catch(() => "")).slice(0, 200)}`);
+  return (await r.json().catch(() => null)) as T;
+}
+type CfgAsaas = { chave: string; sandbox: boolean };
+async function cfgAsaas(): Promise<CfgAsaas | null> {
+  const l = await banco<{ chave: string | null; sandbox: boolean }[]>("integracao_asaas?id=eq.true&select=chave,sandbox").catch(() => []);
+  return l?.[0]?.chave ? { chave: l[0].chave, sandbox: l[0].sandbox === true } : null;
+}
+async function asaas<T>(c: CfgAsaas, metodo: string, caminho: string, corpo?: unknown): Promise<T> {
+  const r = await fetch(`${c.sandbox ? "https://api-sandbox.asaas.com/v3" : "https://api.asaas.com/v3"}${caminho}`, {
+    method: metodo, signal: AbortSignal.timeout(10000),
+    headers: { access_token: c.chave, "Content-Type": "application/json", "User-Agent": "WT-LP" },
+    body: corpo ? JSON.stringify(corpo) : undefined,
+  });
+  if (!r.ok) throw new Error(`Asaas ${r.status} em ${caminho}: ${(await r.text().catch(() => "")).slice(0, 300)}`);
   return (await r.json()) as T;
 }
-type MpPagamento = { status?: string; status_detail?: string; payment_method?: { qr_code?: string; qr_code_base64?: string; ticket_url?: string } };
-type MpPedido = { id: string; status?: string; status_detail?: string; external_reference?: string; total_amount?: string; transactions?: { payments?: MpPagamento[] } };
-const pixDe = (o: MpPedido) => o.transactions?.payments?.[0]?.payment_method;
+// Grupo PAGAMENTO do lead no Kommo (o HUB usa os mesmos campos).
+const CAMPO_STATUS_PAG = 1043859, STATUS_AGUARDANDO = 1013717, CAMPO_PIX = 1043867;
 
-async function criarPix(leadId: number, valor: number, email: string, nome: string) {
-  const valorTxt = valor.toFixed(2);
-  let o = await mp<MpPedido>("/v1/orders", { method: "POST", idem: `lp-lead-${leadId}`, body: JSON.stringify({
-    type: "online", processing_mode: "automatic", total_amount: valorTxt, external_reference: `lead-${leadId}`,
-    description: "Assessoria passaporte - Water Turismo",
-    payer: { email, first_name: nome.split(/\s+/)[0] },
-    transactions: { payments: [{ amount: valorTxt, payment_method: { id: "pix", type: "bank_transfer" } }] },
-  }) });
-  for (let i = 0; i < 3 && !pixDe(o)?.qr_code; i++) { // a criação pode ser assíncrona
-    await new Promise((r) => setTimeout(r, 1200));
-    o = await mp<MpPedido>(`/v1/orders/${encodeURIComponent(o.id)}`);
-  }
-  const pm = pixDe(o);
-  if (!pm?.qr_code || !pm.qr_code_base64) throw new Error("MP não devolveu o QR Code");
-  return { pedido: o.id, qr: pm.qr_code, img: pm.qr_code_base64, link: pm.ticket_url ?? "", valor: valorTxt };
+async function criarPix(leadId: number, valor: number, p: { nome: string; email: string; telefone: string; cpf: string; titulo: string }) {
+  const c = await cfgAsaas();
+  if (!c) return null;
+  const cpf = digitos(p.cpf);
+  const achado = await asaas<{ data?: { id: string }[] }>(c, "GET", `/customers?cpfCnpj=${cpf}&limit=1`);
+  const cliente = achado.data?.[0]?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
+    name: p.nome, cpfCnpj: cpf, email: p.email, mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
+  })).id;
+  const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const pag = await asaas<{ id: string }>(c, "POST", "/payments", {
+    customer: cliente, billingType: "PIX", value: valor, dueDate: amanha,
+    description: "Water Turismo · Assessoria Passaporte", externalReference: `Lead ${leadId} · ${p.titulo}`.slice(0, 100),
+  });
+  const qr = await asaas<{ payload?: string; encodedImage?: string }>(c, "GET", `/payments/${pag.id}/pixQrCode`);
+  if (!qr.payload || !qr.encodedImage) throw new Error("Asaas não devolveu o QR Code");
+  const expira = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+  await banco("cobrancas", { method: "POST", body: JSON.stringify({
+    kommo_lead_id: leadId, valor_centavos: Math.round(valor * 100), order_nsu: `SITE${leadId}-${Date.now().toString(36)}`, origem: "site",
+    cliente_nome: p.nome, expira_em: expira, asaas_id: pag.id, pix_payload: qr.payload, pix_imagem: qr.encodedImage, servico: "Assessoria Passaporte",
+  }) }).catch((e) => console.error("[lp-leads] registrar cobrança", leadId, String(e).slice(0, 200)));
+  await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [
+    { field_id: CAMPO_STATUS_PAG, values: [{ enum_id: STATUS_AGUARDANDO }] }, { field_id: CAMPO_PIX, values: [{ value: qr.payload }] },
+  ] }) }).catch((e) => console.error("[lp-leads] campos pagamento", leadId, String(e).slice(0, 200)));
+  return { pedido: pag.id, qr: qr.payload, img: qr.encodedImage, valor: valor.toFixed(2) };
 }
 
-const pagosConfirmados = new Set<string>();
-// Consulta o pedido direto no Mercado Pago (não confia no conteúdo do aviso) e, se pago, atualiza o lead uma única vez.
-async function confirmarPedido(id: string): Promise<boolean> {
-  if (!/^[A-Za-z0-9_-]{1,64}$/.test(id)) return false;
-  if (pagosConfirmados.has(id)) return true;
-  const o = await mp<MpPedido>(`/v1/orders/${encodeURIComponent(id)}`);
-  if (o.status !== "processed") return false;
-  const leadId = Number((o.external_reference ?? "").replace(/^lead-/, ""));
-  if (!Number.isInteger(leadId) || leadId <= 0) return true;
-  const marca = `PIX CONFIRMADO · pedido ${o.id}`;
-  const notas = await kommo<{ _embedded: { notes: { params?: { text?: string } }[] } }>(`/leads/${leadId}/notes?limit=100`).catch(() => null);
-  if (!notas?._embedded.notes.some((n) => (n.params?.text ?? "").includes(marca))) {
-    const destino = await etapaPago().catch(() => null);
-    if (destino) await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify(destino) })
-      .catch((e) => console.error("[lp-leads] mover etapa falhou", leadId, String(e).slice(0, 200)));
-    await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text:
-      `${marca}\nValor: ${brl(Number(o.total_amount ?? 0))}\n` + (destino ? `Lead movido para a etapa ${ETAPA_PAGO}.` : `Etapa "${ETAPA_PAGO}" não existe no funil ${FUNIL}: lead mantido na etapa atual.`) +
-      `\nConfirmado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.` } }]) });
-    console.log("[lp-leads] pix confirmado", { leadId, pedido: o.id });
-  }
-  pagosConfirmados.add(id);
-  return true;
+// A tela do Pix pergunta se já foi pago: primeiro no banco (o HUB marca ao receber o aviso), depois direto no Asaas.
+async function pixPago(id: string): Promise<boolean> {
+  if (!/^pay_[A-Za-z0-9]{4,40}$/.test(id)) return false;
+  const l = await banco<{ situacao: string }[]>(`cobrancas?asaas_id=eq.${id}&select=situacao`).catch(() => []);
+  if (l?.[0]?.situacao === "pago") return true;
+  if (!l?.length) return false; // só responde por cobranças criadas pelo site
+  const c = await cfgAsaas();
+  if (!c) return false;
+  const p = await asaas<{ status?: string }>(c, "GET", `/payments/${id}`);
+  return p.status === "RECEIVED" || p.status === "CONFIRMED";
 }
 
 // Lead de visto ainda aberto (nem ganho 142 nem perdido 143) desse contato, para reaproveitar em vez de duplicar.
@@ -189,7 +191,7 @@ function analiseTexto(a: unknown): string[] {
 }
 
 // ---------- formulários ----------
-type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null };
+type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null; cpf?: string };
 
 function montarPedido(b: Record<string, unknown>): Pedido | string {
   const tipo = txt(b.tipo, 20);
@@ -223,7 +225,7 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
     const q = inteiro(b.quantidade, 1, 30); if (q === null) return "quantidade";
     if (b.ciente_taxa_pf !== true) return "ciente";
     const cort = Math.floor(q / 5), total = (q - cort) * PRECO_PASSAPORTE;
-    return { tipo, nome, email, telefone: tel, etiqueta: "Passaporte", preco: total,
+    return { tipo, nome, email, telefone: tel, cpf: digitos(cpf), etiqueta: "Passaporte", preco: total,
       titulo: `Passaporte – ${nome} (${q})`,
       nota: [`Contratação de ASSESSORIA DE PASSAPORTE pelo site.`,
         `Passaportes: ${q}${cort ? ` (${cort} cortesia${cort > 1 ? "s" : ""})` : ""} · Assessoria: ${brl(total)}`,
@@ -306,14 +308,8 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
   if (req.method !== "POST") return json({ ok: false, erro: "método" }, 405, h);
 
-  // Aviso (webhook) do Mercado Pago: configure no painel a URL desta função com ?mp=1 e o evento "Order".
-  const url = new URL(req.url);
-  if (url.searchParams.get("mp") === "1") {
-    let id = url.searchParams.get("data.id") ?? "";
-    if (!id) { try { id = String((JSON.parse(await req.text()) as { data?: { id?: string } }).data?.id ?? ""); } catch { /* vazio */ } }
-    try { if (id) await confirmarPedido(id); } catch (e) { console.error("[lp-leads] webhook MP", String(e).slice(0, 300)); }
-    return new Response("ok", { status: 200 });
-  }
+  // Aviso antigo do Mercado Pago (desativado: o Pix agora é pelo Asaas, com aviso para o HUB).
+  if (new URL(req.url).searchParams.get("mp") === "1") return new Response("ok", { status: 200 });
 
   if (!origem || !ORIGENS_PERMITIDAS.includes(origem)) return json({ ok: false, erro: "origem" }, 403, h);
 
@@ -335,7 +331,7 @@ Deno.serve(async (req: Request) => {
   // A tela do Pix pergunta de tempos em tempos se o pagamento já caiu.
   if (b.acao === "status_pix") {
     if (excedeuConsultas(ip)) return json({ ok: false, erro: "limite" }, 429, h);
-    try { return json({ ok: true, pago: await confirmarPedido(txt(b.pedido, 64)) }, 200, h); }
+    try { return json({ ok: true, pago: await pixPago(txt(b.pedido, 64)) }, 200, h); }
     catch (e) { console.error("[lp-leads] status pix", String(e).slice(0, 200)); return json({ ok: true, pago: false }, 200, h); }
   }
   if (excedeuLimite(ip)) return json({ ok: false, erro: "limite" }, 429, h);
@@ -387,11 +383,11 @@ Deno.serve(async (req: Request) => {
     if (p.tipo === "visto" && veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
 
     let pix: Awaited<ReturnType<typeof criarPix>> | null = null;
-    if (p.tipo === "passaporte" && p.preco && Deno.env.get("MP_ACCESS_TOKEN")) {
+    if (p.tipo === "passaporte" && p.preco && p.cpf) {
       try {
-        pix = await criarPix(leadId, p.preco, p.email, p.nome);
-        await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text:
-          `Pix gerado no site (Mercado Pago) · pedido ${pix.pedido} · ${brl(p.preco)} · válido por 24 h. Aguardando pagamento.` } }]) }).catch(() => {});
+        pix = await criarPix(leadId, p.preco, { nome: p.nome, email: p.email, telefone: p.telefone, cpf: p.cpf, titulo: p.titulo });
+        if (pix) await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text:
+          `💳 Pix gerado no site · ${brl(p.preco)} · Assessoria Passaporte · válido por 24 h\nAguardando pagamento. Pix copia e cola no campo "Pix copia e cola".` } }]) }).catch(() => {});
       } catch (e) { console.error("[lp-leads] pix falhou", leadId, String(e).slice(0, 300)); }
     }
     return json({ ok: true, pix }, 200, h);
