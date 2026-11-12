@@ -126,8 +126,11 @@ async function criarPix(leadId: number, valor: number, p: { nome: string; email:
   const c = await cfgAsaas();
   if (!c) return null;
   const cpf = digitos(p.cpf);
-  const achado = await asaas<{ data?: { id: string }[] }>(c, "GET", `/customers?cpfCnpj=${cpf}&limit=1`);
-  const cliente = achado.data?.[0]?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
+  const achado = await asaas<{ data?: { id: string; notificationDisabled?: boolean }[] }>(c, "GET", `/customers?cpfCnpj=${cpf}&limit=1`);
+  const ja = achado.data?.[0];
+  // Cliente já cadastrado: desliga as notificações do Asaas (e-mail/SMS têm custo por cobrança paga). Quem fala com o cliente é a Water.
+  if (ja?.id && ja.notificationDisabled !== true) await asaas(c, "POST", `/customers/${ja.id}`, { notificationDisabled: true }).catch(() => null);
+  const cliente = ja?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
     name: p.nome, cpfCnpj: cpf, email: p.email, mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
   })).id;
   const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
