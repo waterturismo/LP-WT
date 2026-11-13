@@ -131,11 +131,6 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
           <p class="err" data-err="cpf" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">CPF inválido. Confira os números.</p>
         </div>
         <div style="grid-column: span 1; min-width: 0">
-          <label for="v-email" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">E-mail</label>
-          <input id="v-email" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="email" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um e-mail válido.</p>
-        </div>
-        <div style="grid-column: span 2; min-width: 0">
           <label for="v-tel" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">WhatsApp</label>
           <input id="v-tel" name="tel" type="tel" placeholder="(00) 00000-0000" inputmode="tel" maxlength="15" autocomplete="tel" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
           <p class="err" data-err="tel" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um número com DDD.</p>
@@ -173,7 +168,6 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
       <div style="display: inline-block; margin-top: 18px; background: #f4f7fb; border-radius: 14px; padding: 16px 22px; font-size: 16px; line-height: 1.7; color: #14202e; text-align: left">
         <div><strong style="color: #0b2340">Passaportes:</strong> <span id="ps-qtd"></span></div>
         <div><strong style="color: #0b2340">Total da assessoria:</strong> <span id="ps-total"></span></div>
-        <div><strong style="color: #0b2340">E-mail:</strong> <span id="ps-email"></span></div>
       </div>
       <div id="p-pagar" hidden style="margin: 26px auto 0; max-width: 440px; border-top: 1px solid #e3e9f1; padding-top: 24px">
         <div style="font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #1c6fb5">Forma de pagamento</div>
@@ -261,7 +255,7 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
   function v(k) { return ($('v-' + k).value || '').trim(); }
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')), email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')),
+    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')),
       tel: dig(v('tel')).length < 10,
       ciente: !$('v-ciente').checked, consent: !$('v-consent').checked, qtd: q < 1 };
     var algum = false;
@@ -270,11 +264,11 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
     if (algum) { var f1 = form.querySelector('.err:not([hidden])'); if (f1) f1.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     var c = calc();
     var dados = { tipo: 'passaporte', site_web: ($('site_web') || {}).value || '', servico: 'Assessoria passaporte brasileiro', quantidade: q, cortesias: c.cort, valor_unitario: PRECO_PASSAPORTE, valor_total: c.totalNum, taxa_pf_total: Math.round(q * TAXA_PF * 100) / 100,
-      nome: v('nome'), cpf: v('cpf'), email: v('email'), whatsapp: v('tel'),
+      nome: v('nome'), cpf: v('cpf'), whatsapp: v('tel'),
       kommo: { funil: 'VENDAS 1', etapa: 'RESERVA' }, ciente_taxa_pf: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
     function ok() {
       $('ps-nome').textContent = v('nome').split(/\s+/)[0]; $('ps-qtd').textContent = q + (c.cort ? ' (' + c.cort + ' cortesia' + (c.cort > 1 ? 's' : '') + ')' : '');
-      $('ps-total').textContent = brl(c.totalNum); $('ps-email').textContent = v('email');
+      $('ps-total').textContent = brl(c.totalNum);
       form.hidden = true; $('p-sucesso').hidden = false; $('p-sucesso').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     if (!ENDPOINT_PASSAPORTE) { enviarWhatsApp('Assessoria passaporte', dados); ok(); return; }

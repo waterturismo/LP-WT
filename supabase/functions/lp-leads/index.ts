@@ -142,7 +142,7 @@ async function linkCartao(orderNsu: string, valor: number, p: { nome: string; em
       handle: c.handle, order_nsu: orderNsu,
       items: [{ quantity: 1, price: Math.round(valor * 100), description: "Water Turismo · Assessoria Passaporte" }],
       redirect_url: PAGINA_OBRIGADO, webhook_url: `${HUB_AVISOS}/api/infinitepay/webhook?k=${c.webhook_segredo}`,
-      customer: { name: p.nome, email: p.email, phone_number: tel.startsWith("55") ? `+${tel}` : `+55${tel}` },
+      customer: { name: p.nome, ...(p.email ? { email: p.email } : {}), phone_number: tel.startsWith("55") ? `+${tel}` : `+55${tel}` },
       options: { assured_installments: 0, single_payment: true, valid_until: ate, payment_methods_enabled: ["credit_card"] },
     }),
   });
@@ -167,7 +167,7 @@ async function criarCobranca(leadId: number, valor: number, p: { nome: string; e
       // Cliente já cadastrado: desliga as notificações do Asaas (e-mail/SMS têm custo por cobrança paga). Quem fala com o cliente é a Water.
       if (ja?.id && ja.notificationDisabled !== true) await asaas(c, "POST", `/customers/${ja.id}`, { notificationDisabled: true }).catch(() => null);
       const cliente = ja?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
-        name: p.nome, cpfCnpj: cpf, email: p.email, mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
+        name: p.nome, cpfCnpj: cpf, ...(p.email ? { email: p.email } : {}), mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
       })).id;
       const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
       const pag = await asaas<{ id: string }>(c, "POST", "/payments", {
@@ -244,7 +244,8 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
   const tipo = txt(b.tipo, 20);
   const nome = txt(b.nome, 120), email = txt(b.email, 120).toLowerCase(), tel = txt(b.whatsapp, 20);
   if (!nomeOk(nome)) return "nome";
-  if (!emailOk(email)) return "email";
+  // Passaporte: o e-mail é pedido só depois do pagamento (no formulário de cada pessoa).
+  if (!(tipo === "passaporte" && !email) && !emailOk(email)) return "email";
   if (!telOk(tel)) return "whatsapp";
   if (b.consentimento_lgpd !== true) return "consentimento";
 
@@ -267,7 +268,7 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
   const end = [txt(e.rua, 120) + (txt(e.numero, 15) ? ", " + txt(e.numero, 15) : ""), txt(e.complemento, 60), txt(e.bairro, 60),
     txt(e.cidade, 60) + (txt(e.uf, 2) ? "/" + txt(e.uf, 2) : ""), txt(e.cep, 9) ? "CEP " + txt(e.cep, 9) : ""].filter(Boolean).join(" · ");
   const dataBR = (s: string) => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "";
-  const dados = [`Nome: ${nome}`, `CPF: ${cpf}`, ...(nasc ? [`Nascimento: ${dataBR(nasc)}`] : []), `WhatsApp: ${tel}`, `E-mail: ${email}`, ...(end ? [`Endereço: ${end}`] : [])];
+  const dados = [`Nome: ${nome}`, `CPF: ${cpf}`, ...(nasc ? [`Nascimento: ${dataBR(nasc)}`] : []), `WhatsApp: ${tel}`, ...(email ? [`E-mail: ${email}`] : []), ...(end ? [`Endereço: ${end}`] : [])];
 
   if (tipo === "passaporte") {
     const q = inteiro(b.quantidade, 1, 30); if (q === null) return "quantidade";
@@ -408,7 +409,7 @@ Deno.serve(async (req: Request) => {
       name: p.nome,
       custom_fields_values: [
         { field_code: "PHONE", values: [{ value: telE164(p.telefone), enum_code: "MOB" }] },
-        { field_code: "EMAIL", values: [{ value: p.email, enum_code: "WORK" }] },
+        ...(p.email ? [{ field_code: "EMAIL", values: [{ value: p.email, enum_code: "WORK" }] }] : []),
       ],
     };
     const lead = {
