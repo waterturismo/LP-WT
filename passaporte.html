@@ -22,6 +22,8 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 .wt-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(11,35,64,.14)}
 .wt-btn:focus-visible,input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #e8892a;outline-offset:2px}
 @media (max-width: 560px){.vgrid2 > div{grid-column: span 2 !important}}
+  .aba{background:transparent;color:#4a5868}
+  .aba[aria-selected="true"]{background:#ffffff;color:#0b2340;box-shadow:0 2px 8px rgba(11,35,64,.12)}
 </style>
 <style>[hidden]{display:none !important}</style>
 </head>
@@ -48,7 +50,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
         <p style="margin: 0; font-size: clamp(16px, 1.8vw, 18px); line-height: 1.65; color: #c3d2e3; max-width: 520px">Emissão e renovação sem complicação. Nossa equipe cuida da solicitação e orienta você em cada etapa.</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 8px">
           <a class="wt-btn" href="#contratar" style="background: #e8892a; color: #0b2340; font-weight: 700; font-size: 16px; letter-spacing: .04em; text-decoration: none; padding: 17px 30px; border-radius: 999px; min-height: 54px; box-sizing: border-box; display: inline-flex; align-items: center">Contratar assessoria</a>
-          <span style="font-size: 16px; color: #ffffff"><strong style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px">R$ 120</strong> por passaporte</span>
+          <span style="font-size: 16px; color: #ffffff"><strong style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px">R$ 130</strong> por passaporte</span>
         </div>
         <p style="margin: 0; font-size: 14px; color: #c3d2e3">+ taxa da Polícia Federal de R$ 257,25 por passaporte, paga diretamente à PF.</p>
       </div>
@@ -89,7 +91,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
   <section id="contratar" style="max-width: 860px; margin: 0 auto; padding: 56px 20px 72px">
     <div style="font-size: 13px; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: #1c6fb5; margin-bottom: 10px">Contratação</div>
     <h2 style="margin: 0 0 8px; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; color: #0b2340">Contrate a assessoria</h2>
-    <p style="margin: 0 0 28px; font-size: 17px; line-height: 1.6; color: #44525f">Informe quantos passaportes serão solicitados e os dados de quem está contratando. Um consultor entra em contato para dar sequência.</p>
+    <p style="margin: 0 0 28px; font-size: 17px; line-height: 1.6; color: #44525f">Informe quantos passaportes serão solicitados e o contato de quem está contratando. Você paga aqui mesmo, com Pix ou cartão, e já recebe o link para preencher os dados de cada pessoa.</p>
 
     <form id="form-pass" novalidate data-h="1" style="position: relative; background: #ffffff; border: 1px solid #e3e9f1; border-radius: 22px; padding: clamp(22px, 4vw, 36px); display: flex; flex-direction: column; gap: 28px">
       <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off" aria-hidden="true" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0">
@@ -98,7 +100,7 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #e3e9f1; border-radius: 14px">
           <div style="min-width: 0; flex: 1 1 200px">
             <div style="font-weight: 700; font-size: 17px; color: #0b2340">Passaportes</div>
-            <div style="font-size: 14px; color: #4a5868; margin-top: 2px">R$ 120 por passaporte · a cada 4, o 5º é cortesia</div>
+            <div style="font-size: 14px; color: #4a5868; margin-top: 2px">R$ 130 por passaporte · a cada 4, o 5º é cortesia</div>
           </div>
           <div style="display: flex; align-items: center; gap: 10px">
             <button type="button" data-step="-1" aria-label="Diminuir quantidade" style="font: inherit; cursor: pointer; width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid #c9d6e5; background: #ffffff; color: #0b2340; font-size: 22px; font-weight: 700; display: flex; align-items: center; justify-content: center">−</button>
@@ -129,60 +131,14 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
           <p class="err" data-err="cpf" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">CPF inválido. Confira os números.</p>
         </div>
         <div style="grid-column: span 1; min-width: 0">
-          <label for="v-nasc" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Data de nascimento</label>
-          <input id="v-nasc" name="nasc" type="date" placeholder="" autocomplete="bday" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="nasc" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe a data de nascimento. O contratante precisa ter 18 anos ou mais.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
           <label for="v-email" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">E-mail</label>
           <input id="v-email" name="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
           <p class="err" data-err="email" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um e-mail válido.</p>
         </div>
-        <div style="grid-column: span 1; min-width: 0">
+        <div style="grid-column: span 2; min-width: 0">
           <label for="v-tel" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">WhatsApp</label>
           <input id="v-tel" name="tel" type="tel" placeholder="(00) 00000-0000" inputmode="tel" maxlength="15" autocomplete="tel" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
           <p class="err" data-err="tel" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um número com DDD.</p>
-        </div>
-        </div>
-      </fieldset>
-
-      <fieldset style="border: 0; margin: 0; padding: 0; min-width: 0">
-        <legend style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 600; color: #0b2340; margin-bottom: 14px; padding: 0">3. Endereço</legend>
-        <div class="vgrid2" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-cep" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">CEP</label>
-          <input id="v-cep" name="cep" type="text" placeholder="00000-000" inputmode="numeric" maxlength="9" autocomplete="postal-code" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="cep" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe um CEP com 8 números.</p>
-        </div>
-        <div style="grid-column: span 1"></div>
-        <div style="grid-column: span 2; min-width: 0">
-          <label for="v-rua" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Rua / Avenida</label>
-          <input id="v-rua" name="rua" type="text" placeholder="" autocomplete="address-line1" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="rua" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe a rua.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-numero" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Número</label>
-          <input id="v-numero" name="numero" type="text" placeholder=""  style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="numero" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe o número (ou S/N).</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-compl" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Complemento (opcional)</label>
-          <input id="v-compl" name="compl" type="text" placeholder="Apto, bloco, quadra, lote" autocomplete="address-line2" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-bairro" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Bairro</label>
-          <input id="v-bairro" name="bairro" type="text" placeholder=""  style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="bairro" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe o bairro.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-cidade" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Cidade</label>
-          <input id="v-cidade" name="cidade" type="text" placeholder="" autocomplete="address-level2" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5">
-          <p class="err" data-err="cidade" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Informe a cidade.</p>
-        </div>
-        <div style="grid-column: span 1; min-width: 0">
-          <label for="v-uf" style="display: block; font-size: 14px; font-weight: 700; color: #0b2340; margin-bottom: 6px">Estado</label>
-          <select id="v-uf" name="uf" style="width: 100%; box-sizing: border-box; min-height: 48px; padding: 12px 14px; font: inherit; font-size: 16px; color: #14202e; background: #ffffff; border-radius: 12px; border: 1.5px solid #c9d6e5"><option value="">Selecione</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select>
-          <p class="err" data-err="uf" hidden style="margin: 6px 0 0; font-size: 14px; font-weight: 500; color: #b3261e">Selecione o estado.</p>
         </div>
         </div>
       </fieldset>
@@ -204,31 +160,45 @@ a{color:#1c6fb5}a:hover{color:#0b2340}
 
       <p id="v-alert" role="alert" hidden style="margin: 0; padding: 12px 16px; border-radius: 12px; background: #fdecea; font-size: 15px; font-weight: 500; color: #8c1d18">Confira os campos destacados antes de enviar.</p>
 
-      <button type="submit" id="v-btn" class="wt-btn" style="font: inherit; cursor: pointer; align-self: stretch; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Contratar assessoria</button>
-      <p style="margin: -12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868; text-align: center">Ao enviar, você recebe o Pix da assessoria nesta tela. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
+      <button type="submit" id="v-btn" class="wt-btn" style="font: inherit; cursor: pointer; align-self: stretch; background: #e8892a; color: #0b2340; border: 0; font-weight: 700; font-size: 17px; letter-spacing: .03em; padding: 18px 28px; border-radius: 999px; min-height: 56px">Continuar para o pagamento</button>
+      <p style="margin: -12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868; text-align: center">Na próxima tela você escolhe Pix ou cartão de crédito. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
     </form>
 
     <div id="p-sucesso" hidden role="status" style="background: #ffffff; border: 2px solid #e8892a; border-radius: 22px; padding: clamp(28px, 5vw, 48px); text-align: center">
       <div style="width: 64px; height: 64px; border-radius: 50%; background: #0b2340; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e8892a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
       </div>
-      <h3 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 34px); color: #0b2340">Solicitação recebida, <span id="ps-nome"></span>!</h3>
+      <h3 id="ps-titulo" style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: clamp(26px, 3.4vw, 34px); color: #0b2340">Solicitação recebida, <span id="ps-nome"></span>!</h3>
       <p style="margin: 14px auto 0; font-size: 17px; line-height: 1.65; color: #44525f; max-width: 520px">Em breve um consultor da Water Turismo entrará em contato para dar sequência à assessoria do seu passaporte.</p>
       <div style="display: inline-block; margin-top: 18px; background: #f4f7fb; border-radius: 14px; padding: 16px 22px; font-size: 16px; line-height: 1.7; color: #14202e; text-align: left">
         <div><strong style="color: #0b2340">Passaportes:</strong> <span id="ps-qtd"></span></div>
         <div><strong style="color: #0b2340">Total da assessoria:</strong> <span id="ps-total"></span></div>
         <div><strong style="color: #0b2340">E-mail:</strong> <span id="ps-email"></span></div>
       </div>
-          <div id="p-pix" hidden style="margin: 26px auto 0; max-width: 420px; border-top: 1px solid #e3e9f1; padding-top: 24px">
-        <div style="font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #1c6fb5">Pagamento via Pix</div>
-        <p style="margin: 8px 0 16px; font-size: 16px; line-height: 1.6; color: #44525f">Escaneie o QR Code no app do seu banco ou copie o código abaixo.</p>
-        <img id="p-pix-img" alt="QR Code Pix para pagamento" width="220" height="220" style="display: block; margin: 0 auto; width: 220px; height: 220px; max-width: 100%; border-radius: 14px; border: 1px solid #e3e9f1; background: #ffffff; padding: 8px; box-sizing: content-box">
-        <div style="margin-top: 16px; display: flex; gap: 8px; align-items: stretch">
-          <input id="p-pix-code" readonly aria-label="Código Pix copia e cola" style="flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 12px 14px; border: 1px solid #c9d6e5; border-radius: 12px; background: #f4f7fb; color: #14202e">
-          <button type="button" id="p-pix-copiar" class="wt-btn" style="font: inherit; cursor: pointer; background: #0b2340; color: #ffffff; border: 0; font-weight: 700; font-size: 15px; padding: 0 18px; border-radius: 12px; min-height: 48px">Copiar</button>
+      <div id="p-pagar" hidden style="margin: 26px auto 0; max-width: 440px; border-top: 1px solid #e3e9f1; padding-top: 24px">
+        <div style="font-size: 13px; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #1c6fb5">Forma de pagamento</div>
+        <div role="tablist" aria-label="Forma de pagamento" style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f4f7fb; padding: 6px; border-radius: 16px">
+          <button type="button" role="tab" id="t-pix" data-aba="pix" aria-selected="true" class="aba" style="font: inherit; cursor: pointer; border: 0; border-radius: 12px; min-height: 48px; font-weight: 700; font-size: 16px">Pix</button>
+          <button type="button" role="tab" id="t-cartao" data-aba="cartao" aria-selected="false" class="aba" style="font: inherit; cursor: pointer; border: 0; border-radius: 12px; min-height: 48px; font-weight: 700; font-size: 16px">Cartão de crédito</button>
         </div>
-        <p id="p-pix-status" aria-live="polite" style="margin: 16px 0 0; font-size: 15px; font-weight: 500; color: #b35a00">Aguardando pagamento · válido por 24 horas</p>
-        <p style="margin: 10px 0 0; font-size: 13px; line-height: 1.6; color: #4a5868">Pagamento processado pelo Asaas em nome de Water Viagens e Turismo LTDA. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
+        <div id="p-pix" role="tabpanel" style="margin-top: 20px">
+          <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6; color: #44525f">Escaneie o QR Code no app do seu banco ou copie o código abaixo.</p>
+          <img id="p-pix-img" alt="QR Code Pix para pagamento" width="220" height="220" style="display: block; margin: 0 auto; width: 220px; height: 220px; max-width: 100%; border-radius: 14px; border: 1px solid #e3e9f1; background: #ffffff; padding: 8px; box-sizing: content-box">
+          <div style="margin-top: 16px; display: flex; gap: 8px; align-items: stretch">
+            <input id="p-pix-code" readonly aria-label="Código Pix copia e cola" style="flex: 1; min-width: 0; font: inherit; font-size: 14px; padding: 12px 14px; border: 1px solid #c9d6e5; border-radius: 12px; background: #f4f7fb; color: #14202e">
+            <button type="button" id="p-pix-copiar" class="wt-btn" style="font: inherit; cursor: pointer; background: #0b2340; color: #ffffff; border: 0; font-weight: 700; font-size: 15px; padding: 0 18px; border-radius: 12px; min-height: 48px">Copiar</button>
+          </div>
+          <p id="p-pix-status" aria-live="polite" style="margin: 16px 0 0; font-size: 15px; font-weight: 500; color: #b35a00">Aguardando pagamento · válido por 24 horas</p>
+        </div>
+        <div id="p-cartao" role="tabpanel" hidden style="margin-top: 20px">
+          <p style="margin: 0 0 16px; font-size: 16px; line-height: 1.6; color: #44525f">Pague em até 12x no cartão de crédito, na página segura da InfinitePay. Os juros do parcelamento ficam por conta de quem paga.</p>
+          <a id="p-cartao-link" href="#" class="wt-btn" style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background: #e8892a; color: #0b2340; font-weight: 700; font-size: 17px; padding: 16px 24px; border-radius: 999px; min-height: 56px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"></rect><path d="M2.5 10h19M6.5 15h4"></path></svg>
+            Pagar com cartão
+          </a>
+          <p style="margin: 12px 0 0; font-size: 14px; line-height: 1.6; color: #4a5868">Depois de pagar, você volta para a Water Turismo e já recebe o link do formulário.</p>
+        </div>
+        <p style="margin: 18px 0 0; font-size: 13px; line-height: 1.6; color: #4a5868">🔒 Pagamento seguro em nome de Water Viagens e Turismo LTDA. A taxa da Polícia Federal é paga à parte, direto à PF.</p>
       </div>
     </div>
   </section>
@@ -267,7 +237,7 @@ function enviarWhatsApp(titulo, dados) {
 /* ==== CONFIGURAÇÃO ====
    ENDPOINT_PASSAPORTE: URL que recebe as contratações (integração com o Kommo).
    Enquanto estiver vazio, o formulário NÃO envia os dados. */
-var PRECO_PASSAPORTE = 120;
+var PRECO_PASSAPORTE = 130;
 var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1/lp-leads';
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -282,27 +252,17 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
   document.querySelectorAll('[data-step]').forEach(function (b) { b.addEventListener('click', function () { q = Math.max(0, Math.min(30, q + (+b.dataset.step))); render(); }); });
   var masks = {
     cpf: function (v) { var d = dig(v).slice(0, 11); return d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2'); },
-    tel: function (v) { var d = dig(v).slice(0, 11); return d.length <= 10 ? d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2') : d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2'); },
-    cep: function (v) { return dig(v).slice(0, 8).replace(/(\d{5})(\d)/, '$1-$2'); }
+    tel: function (v) { var d = dig(v).slice(0, 11); return d.length <= 10 ? d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2') : d.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2'); }
   };
   Object.keys(masks).forEach(function (k) { $('v-' + k).addEventListener('input', function (e) { e.target.value = masks[k](e.target.value); }); });
-  $('v-cep').addEventListener('blur', function () {
-    var c = dig(this.value); if (c.length !== 8) return;
-    fetch('https://viacep.com.br/ws/' + c + '/json/').then(function (r) { return r.json(); }).then(function (d) {
-      if (d.erro) return;
-      if (!$('v-rua').value) $('v-rua').value = d.logradouro || ''; if (!$('v-bairro').value) $('v-bairro').value = d.bairro || '';
-      if (!$('v-cidade').value) $('v-cidade').value = d.localidade || ''; if (!$('v-uf').value) $('v-uf').value = d.uf || '';
-    }).catch(function () {});
-  });
   function cpfOk(s) { var d = dig(s), t, r, i; if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false;
     for (t = 0, i = 0; i < 9; i++) t += +d[i] * (10 - i); r = (t * 10) % 11; if (r === 10) r = 0; if (r !== +d[9]) return false;
     for (t = 0, i = 0; i < 10; i++) t += +d[i] * (11 - i); r = (t * 10) % 11; if (r === 10) r = 0; return r === +d[10]; }
-  function maior(s) { if (!s) return false; var b = new Date(s + 'T00:00:00'); if (isNaN(b) || b.getFullYear() < 1900) return false; return new Date(b.getFullYear() + 18, b.getMonth(), b.getDate()) <= new Date(); }
   function v(k) { return ($('v-' + k).value || '').trim(); }
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
-    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')), nasc: !maior(v('nasc')), email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')),
-      tel: dig(v('tel')).length < 10, cep: dig(v('cep')).length !== 8, rua: !v('rua'), numero: !v('numero'), bairro: !v('bairro'), cidade: !v('cidade'), uf: !v('uf'),
+    var e = { nome: v('nome').split(/\s+/).filter(Boolean).length < 2, cpf: !cpfOk(v('cpf')), email: !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v('email')),
+      tel: dig(v('tel')).length < 10,
       ciente: !$('v-ciente').checked, consent: !$('v-consent').checked, qtd: q < 1 };
     var algum = false;
     Object.keys(e).forEach(function (k) { var m = form.querySelector('[data-err="' + k + '"]'); if (m) m.hidden = !e[k]; var inp = $('v-' + k); if (inp && inp.type !== 'checkbox') inp.style.borderColor = e[k] ? '#b3261e' : '#c9d6e5'; if (e[k]) algum = true; });
@@ -310,8 +270,7 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
     if (algum) { var f1 = form.querySelector('.err:not([hidden])'); if (f1) f1.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     var c = calc();
     var dados = { tipo: 'passaporte', site_web: ($('site_web') || {}).value || '', servico: 'Assessoria passaporte brasileiro', quantidade: q, cortesias: c.cort, valor_unitario: PRECO_PASSAPORTE, valor_total: c.totalNum, taxa_pf_total: Math.round(q * TAXA_PF * 100) / 100,
-      nome: v('nome'), cpf: v('cpf'), nascimento: v('nasc'), email: v('email'), whatsapp: v('tel'),
-      endereco: { cep: v('cep'), rua: v('rua'), numero: v('numero'), complemento: v('compl'), bairro: v('bairro'), cidade: v('cidade'), uf: v('uf') },
+      nome: v('nome'), cpf: v('cpf'), email: v('email'), whatsapp: v('tel'),
       kommo: { funil: 'VENDAS 1', etapa: 'RESERVA' }, ciente_taxa_pf: true, consentimento_lgpd: true, enviado_em: new Date().toISOString() };
     function ok() {
       $('ps-nome').textContent = v('nome').split(/\s+/)[0]; $('ps-qtd').textContent = q + (c.cort ? ' (' + c.cort + ' cortesia' + (c.cort > 1 ? 's' : '') + ')' : '');
@@ -322,12 +281,24 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
     var btn = $('v-btn'); btn.disabled = true; btn.textContent = 'Enviando...';
     fetch(ENDPOINT_PASSAPORTE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json().catch(function () { return {}; }); })
-      .then(function (j) { ok(); if (j && j.pix && j.pix.qr) mostrarPix(j.pix); })
+      .then(function (j) { ok(); if (j && ((j.pix && j.pix.qr) || j.cartao)) mostrarPagamento(j); })
       .catch(function () { enviarWhatsApp('Assessoria passaporte', dados); ok(); });
   });
-  function mostrarPix(px) {
-    $('p-pix-img').src = 'data:image/png;base64,' + px.img; $('p-pix-code').value = px.qr; $('p-pix').hidden = false;
-    var msg = $('p-sucesso').querySelector('p'); if (msg) msg.textContent = 'Falta só o pagamento. Assim que o Pix for confirmado, um consultor da Water Turismo fala com você para dar sequência à assessoria do seu passaporte.';
+  var OBRIGADO = 'https://pagamento.waterturismo.com.br/pagar/obrigado?order_nsu=';
+  function aba(qual) {
+    ['pix', 'cartao'].forEach(function (k) { var on = k === qual; $('t-' + k).setAttribute('aria-selected', on ? 'true' : 'false'); $('p-' + k).hidden = !on; });
+  }
+  document.querySelectorAll('[data-aba]').forEach(function (b) { b.addEventListener('click', function () { aba(b.dataset.aba); }); });
+  function mostrarPagamento(j) {
+    var px = j.pix && j.pix.qr ? j.pix : null, cartao = j.cartao || null;
+    $('p-pagar').hidden = false;
+    $('ps-titulo').innerHTML = 'Falta só o pagamento, <span id="ps-nome2"></span>!'; $('ps-nome2').textContent = v('nome').split(/\s+/)[0];
+    var msg = $('p-sucesso').querySelector('p'); if (msg) msg.textContent = 'Assim que o pagamento for confirmado, você recebe nesta tela (e no seu WhatsApp) o link para preencher os dados de cada pessoa.';
+    if (!px) { $('t-pix').hidden = true; aba('cartao'); } else aba('pix');
+    if (!cartao) { $('t-cartao').hidden = true; } else $('p-cartao-link').href = cartao;
+    if (!px || !cartao) $('t-pix').parentNode.style.gridTemplateColumns = '1fr';
+    if (!px) return;
+    $('p-pix-img').src = 'data:image/png;base64,' + px.img; $('p-pix-code').value = px.qr;
     $('p-pix-copiar').onclick = function () {
       var c = $('p-pix-code'); c.select();
       var done = function () { $('p-pix-copiar').textContent = 'Copiado!'; setTimeout(function () { $('p-pix-copiar').textContent = 'Copiar'; }, 2500); };
@@ -339,7 +310,11 @@ var ENDPOINT_PASSAPORTE = 'https://hswthvjlfmnihbtjgeaw.supabase.co/functions/v1
       if (++tentativas > 240) { clearInterval(timer); return; }
       fetch(ENDPOINT_PASSAPORTE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ acao: 'status_pix', pedido: px.pedido }) })
         .then(function (r) { return r.json(); })
-        .then(function (j) { if (j && j.pago) { clearInterval(timer); st.style.color = '#1b7a3a'; st.textContent = 'Pagamento confirmado! Obrigado.'; $('p-pix-img').style.opacity = '.35'; } })
+        .then(function (k) {
+          if (!k || !k.pago) return;
+          clearInterval(timer); st.style.color = '#1b7a3a'; st.textContent = 'Pagamento confirmado! Abrindo o seu formulário...'; $('p-pix-img').style.opacity = '.35';
+          if (px.nsu) setTimeout(function () { location.href = OBRIGADO + encodeURIComponent(px.nsu); }, 1200);
+        })
         .catch(function () {});
     }, 7000);
   }

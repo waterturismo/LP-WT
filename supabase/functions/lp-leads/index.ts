@@ -13,7 +13,7 @@ const ORIGENS_PERMITIDAS = [
   "https://waterturismo.github.io",
 ];
 
-const PRECO_PASSAPORTE = 120;
+const PRECO_PASSAPORTE = 130;
 const TAXA_PF = 257.25;
 const PLANOS: Record<string, number> = { Essencial: 250, Superior: 400, Luxo: 600 };
 
@@ -121,34 +121,78 @@ async function asaas<T>(c: CfgAsaas, metodo: string, caminho: string, corpo?: un
 }
 // Grupo PAGAMENTO do lead no Kommo (o HUB usa os mesmos campos).
 const CAMPO_STATUS_PAG = 1043859, STATUS_AGUARDANDO = 1013717, CAMPO_PIX = 1043867;
+// Lead de passaporte: "Fornecedor:" = Passaporte e "Total de Pax's:".
+const CAMPO_FORNECEDOR = 117590, FORNECEDOR_PASSAPORTE = 545416, CAMPO_TOTAL_PAX = 252928;
 
-async function criarPix(leadId: number, valor: number, p: { nome: string; email: string; telefone: string; cpf: string; titulo: string }) {
-  const c = await cfgAsaas();
-  if (!c) return null;
-  const cpf = digitos(p.cpf);
-  const achado = await asaas<{ data?: { id: string; notificationDisabled?: boolean }[] }>(c, "GET", `/customers?cpfCnpj=${cpf}&limit=1`);
-  const ja = achado.data?.[0];
-  // Cliente já cadastrado: desliga as notificações do Asaas (e-mail/SMS têm custo por cobrança paga). Quem fala com o cliente é a Water.
-  if (ja?.id && ja.notificationDisabled !== true) await asaas(c, "POST", `/customers/${ja.id}`, { notificationDisabled: true }).catch(() => null);
-  const cliente = ja?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
-    name: p.nome, cpfCnpj: cpf, email: p.email, mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
-  })).id;
-  const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
-  const pag = await asaas<{ id: string }>(c, "POST", "/payments", {
-    customer: cliente, billingType: "PIX", value: valor, dueDate: amanha,
-    description: "Water Turismo · Assessoria Passaporte", externalReference: `Lead ${leadId} · ${p.titulo}`.slice(0, 100),
+// ---------- InfinitePay (cartão) ----------
+// Chave e handle no HUB (tabela integracao_infinitepay). Juros do parcelamento por conta de quem paga.
+// O aviso de cartão pago vai para o HUB, que confere na InfinitePay e marca a mesma cobrança (e cancela o Pix).
+const HUB_AVISOS = Deno.env.get("HUB_AVISOS") ?? "https://indique.waterturismo.com.br";
+const PAGINA_OBRIGADO = Deno.env.get("PAGINA_OBRIGADO") ?? "https://pagamento.waterturismo.com.br/pagar/obrigado";
+async function linkCartao(orderNsu: string, valor: number, p: { nome: string; email: string; telefone: string }): Promise<string | null> {
+  const l = await banco<{ handle: string | null; chave: string | null; webhook_segredo: string | null }[]>("integracao_infinitepay?id=eq.true&select=handle,chave,webhook_segredo").catch(() => []);
+  const c = l?.[0];
+  if (!c?.handle || !c.chave || !c.webhook_segredo) return null;
+  const ate = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 19) + "-03:00";
+  const tel = digitos(p.telefone);
+  const r = await fetch("https://api.checkout.infinitepay.io/links", {
+    method: "POST", signal: AbortSignal.timeout(15000),
+    headers: { "Content-Type": "application/json", "X-Api-Key": c.chave },
+    body: JSON.stringify({
+      handle: c.handle, order_nsu: orderNsu,
+      items: [{ quantity: 1, price: Math.round(valor * 100), description: "Water Turismo · Assessoria Passaporte" }],
+      redirect_url: PAGINA_OBRIGADO, webhook_url: `${HUB_AVISOS}/api/infinitepay/webhook?k=${c.webhook_segredo}`,
+      customer: { name: p.nome, email: p.email, phone_number: tel.startsWith("55") ? `+${tel}` : `+55${tel}` },
+      options: { assured_installments: 0, single_payment: true, valid_until: ate, payment_methods_enabled: ["credit_card"] },
+    }),
   });
-  const qr = await asaas<{ payload?: string; encodedImage?: string }>(c, "GET", `/payments/${pag.id}/pixQrCode`);
-  if (!qr.payload || !qr.encodedImage) throw new Error("Asaas não devolveu o QR Code");
+  const texto = await r.text();
+  if (!r.ok) throw new Error(`InfinitePay ${r.status}: ${texto.slice(0, 200)}`);
+  const m = texto.match(/"(?:url|link|checkout_url|payment_url|invoice_url)"\s*:\s*"(https:[^"]+)"/);
+  if (!m) throw new Error(`InfinitePay sem link: ${texto.slice(0, 160)}`);
+  return m[1].replace(/\\\//g, "/");
+}
+
+/** Cobrança do site: Pix (Asaas) + cartão (InfinitePay) numa só cobrança. Pago um, o HUB cancela o outro. */
+async function criarCobranca(leadId: number, valor: number, p: { nome: string; email: string; telefone: string; cpf: string; titulo: string }) {
+  const orderNsu = `WT${leadId}-${Date.now().toString(36)}`;
+  const falhas: string[] = [];
+  let pix: { pedido: string; qr: string; img: string } | null = null;
+  const c = await cfgAsaas();
+  if (c && valor >= 5) {
+    try {
+      const cpf = digitos(p.cpf);
+      const achado = await asaas<{ data?: { id: string; notificationDisabled?: boolean }[] }>(c, "GET", `/customers?cpfCnpj=${cpf}&limit=1`);
+      const ja = achado.data?.[0];
+      // Cliente já cadastrado: desliga as notificações do Asaas (e-mail/SMS têm custo por cobrança paga). Quem fala com o cliente é a Water.
+      if (ja?.id && ja.notificationDisabled !== true) await asaas(c, "POST", `/customers/${ja.id}`, { notificationDisabled: true }).catch(() => null);
+      const cliente = ja?.id ?? (await asaas<{ id: string }>(c, "POST", "/customers", {
+        name: p.nome, cpfCnpj: cpf, email: p.email, mobilePhone: digitos(p.telefone).replace(/^55(?=\d{10,11}$)/, ""), notificationDisabled: true,
+      })).id;
+      const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
+      const pag = await asaas<{ id: string }>(c, "POST", "/payments", {
+        customer: cliente, billingType: "PIX", value: valor, dueDate: amanha,
+        description: "Water Turismo · Assessoria Passaporte", externalReference: `Lead ${leadId} · ${p.titulo}`.slice(0, 100),
+      });
+      const qr = await asaas<{ payload?: string; encodedImage?: string }>(c, "GET", `/payments/${pag.id}/pixQrCode`);
+      if (!qr.payload || !qr.encodedImage) throw new Error("Asaas não devolveu o QR Code");
+      pix = { pedido: pag.id, qr: qr.payload, img: qr.encodedImage };
+    } catch (e) { falhas.push(`Pix: ${String(e).slice(0, 160)}`); }
+  }
+  let cartao: string | null = null;
+  try { cartao = await linkCartao(orderNsu, valor, p); } catch (e) { falhas.push(`Cartão: ${String(e).slice(0, 160)}`); }
+  if (falhas.length) console.error("[lp-leads] cobrança", leadId, falhas.join(" | "));
+  if (!pix && !cartao) return null;
   const expira = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
   await banco("cobrancas", { method: "POST", body: JSON.stringify({
-    kommo_lead_id: leadId, valor_centavos: Math.round(valor * 100), order_nsu: `SITE${leadId}-${Date.now().toString(36)}`, origem: "site",
-    cliente_nome: p.nome, expira_em: expira, asaas_id: pag.id, pix_payload: qr.payload, pix_imagem: qr.encodedImage, servico: "Assessoria Passaporte",
+    kommo_lead_id: leadId, valor_centavos: Math.round(valor * 100), order_nsu: orderNsu, origem: "site", cliente_nome: p.nome, expira_em: expira,
+    asaas_id: pix?.pedido ?? null, pix_payload: pix?.qr ?? null, pix_imagem: pix?.img ?? null, checkout_url: cartao, servico: "Assessoria Passaporte",
+    erro: falhas.length ? falhas.join(" | ").slice(0, 300) : null,
   }) }).catch((e) => console.error("[lp-leads] registrar cobrança", leadId, String(e).slice(0, 200)));
   await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [
-    { field_id: CAMPO_STATUS_PAG, values: [{ enum_id: STATUS_AGUARDANDO }] }, { field_id: CAMPO_PIX, values: [{ value: qr.payload }] },
+    { field_id: CAMPO_STATUS_PAG, values: [{ enum_id: STATUS_AGUARDANDO }] }, { field_id: CAMPO_PIX, values: [{ value: pix?.qr ?? "" }] },
   ] }) }).catch((e) => console.error("[lp-leads] campos pagamento", leadId, String(e).slice(0, 200)));
-  return { pedido: pag.id, qr: qr.payload, img: qr.encodedImage, valor: valor.toFixed(2) };
+  return { pix: pix ? { ...pix, valor: valor.toFixed(2), nsu: orderNsu } : null, cartao, nsu: orderNsu, falhas };
 }
 
 // A tela do Pix pergunta se já foi pago: primeiro no banco (o HUB marca ao receber o aviso), depois direto no Asaas.
@@ -194,7 +238,7 @@ function analiseTexto(a: unknown): string[] {
 }
 
 // ---------- formulários ----------
-type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null; cpf?: string };
+type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null; cpf?: string; quantidade?: number };
 
 function montarPedido(b: Record<string, unknown>): Pedido | string {
   const tipo = txt(b.tipo, 20);
@@ -217,24 +261,25 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
 
   const cpf = txt(b.cpf, 14), nasc = txt(b.nascimento, 10);
   if (!cpfOk(cpf)) return "cpf";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(nasc)) return "nascimento";
+  // Passaporte: só nome, CPF, e-mail e WhatsApp (os dados de cada pessoa vêm no formulário depois do pagamento).
+  if (tipo !== "passaporte" && !/^\d{4}-\d{2}-\d{2}$/.test(nasc)) return "nascimento";
   const e = (b.endereco && typeof b.endereco === "object" ? b.endereco : b) as Record<string, unknown>;
   const end = [txt(e.rua, 120) + (txt(e.numero, 15) ? ", " + txt(e.numero, 15) : ""), txt(e.complemento, 60), txt(e.bairro, 60),
     txt(e.cidade, 60) + (txt(e.uf, 2) ? "/" + txt(e.uf, 2) : ""), txt(e.cep, 9) ? "CEP " + txt(e.cep, 9) : ""].filter(Boolean).join(" · ");
   const dataBR = (s: string) => s ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : "";
-  const dados = [`Nome: ${nome}`, `CPF: ${cpf}`, `Nascimento: ${dataBR(nasc)}`, `WhatsApp: ${tel}`, `E-mail: ${email}`, `Endereço: ${end}`];
+  const dados = [`Nome: ${nome}`, `CPF: ${cpf}`, ...(nasc ? [`Nascimento: ${dataBR(nasc)}`] : []), `WhatsApp: ${tel}`, `E-mail: ${email}`, ...(end ? [`Endereço: ${end}`] : [])];
 
   if (tipo === "passaporte") {
     const q = inteiro(b.quantidade, 1, 30); if (q === null) return "quantidade";
     if (b.ciente_taxa_pf !== true) return "ciente";
     const cort = Math.floor(q / 5), total = (q - cort) * PRECO_PASSAPORTE;
-    return { tipo, nome, email, telefone: tel, cpf: digitos(cpf), etiqueta: "Passaporte", preco: total,
+    return { tipo, nome, email, telefone: tel, cpf: digitos(cpf), etiqueta: "Passaporte", preco: total, quantidade: q,
       titulo: `Passaporte – ${nome} (${q})`,
       nota: [`Contratação de ASSESSORIA DE PASSAPORTE pelo site.`,
         `Passaportes: ${q}${cort ? ` (${cort} cortesia${cort > 1 ? "s" : ""})` : ""} · Assessoria: ${brl(total)}`,
         `Taxa da Polícia Federal (paga à PF): ${brl(q * TAXA_PF)} no total.`,
         `Cliente declarou estar ciente da taxa da PF.`, "", ...dados,
-        "", "Próximo passo: enviar orientações e forma de pagamento."] };
+        "", "Pix e cartão gerados no site. Pago → o lead vai sozinho para venda fechada."] };
   }
 
   if (tipo === "programada") {
@@ -369,7 +414,15 @@ Deno.serve(async (req: Request) => {
     const lead = {
       name: p.titulo, ...destino,
       ...(p.preco ? { price: Math.round(p.preco) } : {}),
-      ...(origemCampo ? { custom_fields_values: [origemCampo] } : {}),
+      ...(() => {
+        // Passaporte: Fornecedor = Passaporte e Total de Pax's (o Salesbot da venda fechada usa os dois para criar o lead do funil PASSAPORTE).
+        const extras = p.tipo === "passaporte" ? [
+          { field_id: CAMPO_FORNECEDOR, values: [{ enum_id: FORNECEDOR_PASSAPORTE }] },
+          { field_id: CAMPO_TOTAL_PAX, values: [{ value: String(p.quantidade ?? 1) }] },
+        ] : [];
+        const todos = [...(origemCampo ? [origemCampo] : []), ...extras];
+        return todos.length ? { custom_fields_values: todos } : {};
+      })(),
       _embedded: {
         tags: [{ name: ORIGEM }, { name: p.etiqueta }, ...(existente ? [{ name: "Contato já existia no Kommo" }] : [])],
         contacts: [contato],
@@ -385,15 +438,18 @@ Deno.serve(async (req: Request) => {
     console.log("[lp-leads] lead criado", { tipo: p.tipo, leadId });
     if (p.tipo === "visto" && veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
 
-    let pix: Awaited<ReturnType<typeof criarPix>> | null = null;
+    let cob: Awaited<ReturnType<typeof criarCobranca>> | null = null;
     if (p.tipo === "passaporte" && p.preco && p.cpf) {
       try {
-        pix = await criarPix(leadId, p.preco, { nome: p.nome, email: p.email, telefone: p.telefone, cpf: p.cpf, titulo: p.titulo });
-        if (pix) await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text:
-          `💳 Pix gerado no site · ${brl(p.preco)} · Assessoria Passaporte · válido por 24 h\nAguardando pagamento. Pix copia e cola no campo "Pix copia e cola".` } }]) }).catch(() => {});
-      } catch (e) { console.error("[lp-leads] pix falhou", leadId, String(e).slice(0, 300)); }
+        cob = await criarCobranca(leadId, p.preco, { nome: p.nome, email: p.email, telefone: p.telefone, cpf: p.cpf, titulo: p.titulo });
+        if (cob) {
+          const meios = [cob.pix && "Pix", cob.cartao && "cartão em até 12x (juros por conta do cliente)"].filter(Boolean).join(" ou ");
+          await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text:
+            `💳 Pagamento gerado no site · ${brl(p.preco)} · Assessoria Passaporte · ${meios} · válido por 24 h\nAguardando pagamento. Pago, o lead vai sozinho para venda fechada.${cob.falhas.length ? `\n⚠️ ${cob.falhas.map((f) => f.split(":")[0]).join(" e ")} indisponível agora.` : ""}` } }]) }).catch(() => {});
+        }
+      } catch (e) { console.error("[lp-leads] cobrança falhou", leadId, String(e).slice(0, 300)); }
     }
-    return json({ ok: true, pix }, 200, h);
+    return json({ ok: true, pix: cob?.pix ?? null, cartao: cob?.cartao ?? null }, 200, h);
   } catch (e) {
     console.error("[lp-leads] falha", p.tipo, String(e).slice(0, 300));
     return json({ ok: false, erro: "kommo" }, 502, h);
