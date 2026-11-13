@@ -1,5 +1,6 @@
 // Recebe os formulários da LP Water Turismo (visto, passaporte, Viagem Programada)
 // e cria o lead no Kommo: funil VENDAS 1 — visto em PREPARAR PROPOSTA, os demais em RESERVA — com contato, etiquetas e nota.
+// v18: passaporte a R$ 130 com Pix (Asaas) + cartão (InfinitePay); e-mail só depois do pagamento; Fornecedor = Passaporte e Total de Pax no lead.
 // O token do Kommo fica no segredo KOMMO_TOKEN do Supabase — nunca no site.
 
 const KOMMO_SUBDOMINIO = Deno.env.get("KOMMO_SUBDOMINIO") ?? "waterturismo";
@@ -310,7 +311,7 @@ function excedeuConsultas(ip: string) {
 // ---------- estatística do site (link da bio e análise) ----------
 // Sem dados pessoais: só página, evento, origem e tipo de aparelho. Grava em public.site_eventos (painel do Indique e Ganhe).
 const ROBOS = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp\/|telegrambot|preview|headless|lighthouse|curl|wget|python|axios|node-fetch|go-http|java\/|monitor|uptime|scan/i;
-const ALVOS = ["lista_vip_black", "visto"];
+const ALVOS = ["lista_vip_black", "visto", "passaporte"];
 const sistemaDe = (ua: string) => /android/i.test(ua) ? "Android" : /iphone|ipad|ipod/i.test(ua) ? "iOS (iPhone/iPad)" : /windows/i.test(ua) ? "Windows"
   : /mac os x|macintosh/i.test(ua) ? "macOS" : /cros/i.test(ua) ? "ChromeOS" : /linux/i.test(ua) ? "Linux" : "Outro";
 const aparelhoDe = (ua: string) => (/ipad|tablet/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua))) ? "Tablet" : /mobi|iphone|ipod|android/i.test(ua) ? "Celular" : "Computador";
