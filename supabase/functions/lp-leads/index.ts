@@ -126,6 +126,42 @@ const CAMPO_STATUS_PAG = 1043859, STATUS_AGUARDANDO = 1013717, CAMPO_PIX = 10438
 const CAMPO_FORNECEDOR = 117590, FORNECEDOR_PASSAPORTE = 545416, CAMPO_TOTAL_PAX = 252928;
 // Compra pelo site: "Consultor" = Lucyanno só na criação do lead (a equipe pode trocar depois no Kommo).
 const CAMPO_CONSULTOR = 263974, CONSULTOR_LUCYANNO = 217110;
+// Viagem Programada: "Fornecedor:" = VIAGEM PROGRAMADA, grupo VIAGEM PROGRAMADA e grupo Contrato (nome e CPF).
+const FORNECEDOR_PROGRAMADA = 207728, CAMPO_PLANO = 1043929, CAMPO_PARCELAS = 1043931, CAMPO_VENCIMENTO1 = 1043935;
+const ENUM_PLANO: Record<string, number> = { Essencial: 1013927, Superior: 1013929, Luxo: 1013931 };
+const ENUM_PARCELAS: Record<number, number> = { 12: 1013935, 18: 1013937, 24: 1013939 };
+const CAMPO_CONTRATO_NOME = 1032283, CAMPO_CONTRATO_CPF = 1032281, CAMPO_ENDERECO_CONTATO = 254354;
+function enderecoKommo(e: Record<string, string>) {
+  return { field_id: CAMPO_ENDERECO_CONTATO, values: [
+    { value: [e.rua, e.numero].filter(Boolean).join(", "), subtype: "address_line_1" },
+    ...(e.complemento || e.bairro ? [{ value: [e.complemento, e.bairro].filter(Boolean).join(" · "), subtype: "address_line_2" }] : []),
+    { value: e.cidade, subtype: "city" },
+    ...(e.estado ? [{ value: e.estado, subtype: "state" }] : []),
+    ...(e.cep ? [{ value: e.cep, subtype: "zip" }] : []),
+    { value: "BR", subtype: "country" },
+  ] };
+}
+/** Contato que já existia: e-mail do site vira o principal (é para ele que vai o contrato) e o endereço é atualizado. */
+async function atualizarContatoProgramada(id: number, email: string, endereco: Record<string, string>) {
+  const c = await kommo<{ custom_fields_values?: { field_code?: string | null; values: { value: string; enum_code?: string }[] }[] | null }>(`/contacts/${id}`);
+  const lista = (c?.custom_fields_values ?? []).find((f) => f.field_code === "EMAIL")?.values ?? [];
+  if (String(lista[0]?.value ?? "").trim().toLowerCase() !== email) {
+    const outros = lista.filter((v) => String(v.value ?? "").trim().toLowerCase() !== email).map((v) => ({ value: v.value, enum_code: v.enum_code ?? "OTHER" }));
+    await kommo(`/contacts/${id}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [{ field_code: "EMAIL", values: [{ value: email, enum_code: "WORK" }, ...outros] }] }) });
+  }
+  if (endereco.rua && endereco.cidade) await kommo(`/contacts/${id}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [enderecoKommo(endereco)] }) });
+}
+/** Avisa o HUB para gerar e enviar o contrato da Viagem Programada (mesma senha interna do receptor do Kommo). */
+async function avisarHubContrato(leadId: number) {
+  const url = Deno.env.get("SUPABASE_URL")!, chave = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const s = await fetch(`${url}/rest/v1/segredos_internos?nome=eq.hub_contratos&select=valor`, { headers: { apikey: chave, Authorization: `Bearer ${chave}` } });
+  const senha = s.ok ? ((await s.json()) as { valor: string }[])[0]?.valor : undefined;
+  if (!senha) throw new Error("senha interna indisponível");
+  const r = await fetch(`${HUB_AVISOS}/api/contratos/kommo`, { method: "POST", signal: AbortSignal.timeout(55000),
+    headers: { Authorization: `Bearer ${senha}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ lead: { id: leadId, custom_fields_values: [{ field_id: CAMPO_FORNECEDOR, values: [{ enum_id: FORNECEDOR_PROGRAMADA }] }] } }) });
+  console.log("[lp-leads] contrato programada", { leadId, status: r.status, resposta: (await r.text().catch(() => "")).slice(0, 160) });
+}
 
 // ---------- InfinitePay (cartão) ----------
 // Chave e handle no HUB (tabela integracao_infinitepay). Juros do parcelamento por conta de quem paga.
@@ -241,7 +277,8 @@ function analiseTexto(a: unknown): string[] {
 }
 
 // ---------- formulários ----------
-type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null; cpf?: string; quantidade?: number };
+type Programada = { plano: string; parcelas: number; vencimento: string; endereco: Record<string, string> };
+type Pedido = { tipo: string; titulo: string; etiqueta: string; nome: string; telefone: string; email: string; nota: string[]; preco: number | null; cpf?: string; quantidade?: number; programada?: Programada };
 
 function montarPedido(b: Record<string, unknown>): Pedido | string {
   const tipo = txt(b.tipo, 20);
@@ -293,13 +330,16 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
     const venc = txt(b.vencimento_1o_boleto, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(venc)) return "vencimento";
     if (b.aceite_regras !== true) return "regras";
-    return { tipo, nome, email, telefone: tel, etiqueta: "Viagem Programada", preco: m * n,
+    const endereco = { rua: txt(e.rua, 120), numero: txt(e.numero, 15), complemento: txt(e.complemento, 60), bairro: txt(e.bairro, 60),
+      cidade: txt(e.cidade, 60), estado: txt(e.uf, 2), cep: digitos(txt(e.cep, 9)) };
+    return { tipo, nome, email, telefone: tel, etiqueta: "Viagem Programada", preco: m * n, cpf: digitos(cpf),
+      programada: { plano, parcelas: n, vencimento: venc, endereco },
       titulo: `Viagem Programada ${plano} – ${nome}`,
       nota: [`Adesão à WATER VIAGEM PROGRAMADA pelo site.`,
         `Plano ${plano}: ${n}x de ${brl(m)} · Crédito total ${brl(m * n)}`,
         `1º vencimento escolhido: ${dataBR(venc)} (demais no mesmo dia dos meses seguintes).`,
         `Cliente aceitou as regras da Viagem Programada.`, "", ...dados,
-        "", "Próximo passo: enviar contrato e boletos."] };
+        "", "O contrato é gerado e enviado sozinho para assinatura (1º o consultor, depois o cliente). Assinado por todos, o lead vai para venda fechada. Depois: enviar os boletos."] };
   }
   return "tipo";
 }
@@ -413,6 +453,7 @@ Deno.serve(async (req: Request) => {
       custom_fields_values: [
         { field_code: "PHONE", values: [{ value: telE164(p.telefone), enum_code: "MOB" }] },
         ...(p.email ? [{ field_code: "EMAIL", values: [{ value: p.email, enum_code: "WORK" }] }] : []),
+        ...(p.programada?.endereco.rua && p.programada.endereco.cidade ? [enderecoKommo(p.programada.endereco)] : []),
       ],
     };
     const lead = {
@@ -424,6 +465,14 @@ Deno.serve(async (req: Request) => {
           { field_id: CAMPO_FORNECEDOR, values: [{ enum_id: FORNECEDOR_PASSAPORTE }] },
           { field_id: CAMPO_TOTAL_PAX, values: [{ value: String(p.quantidade ?? 1) }] },
           { field_id: CAMPO_CONSULTOR, values: [{ enum_id: CONSULTOR_LUCYANNO }] },
+        ] : p.tipo === "programada" && p.programada ? [
+          { field_id: CAMPO_FORNECEDOR, values: [{ enum_id: FORNECEDOR_PROGRAMADA }] },
+          { field_id: CAMPO_PLANO, values: [{ enum_id: ENUM_PLANO[p.programada.plano] }] },
+          { field_id: CAMPO_PARCELAS, values: [{ enum_id: ENUM_PARCELAS[p.programada.parcelas] }] },
+          { field_id: CAMPO_VENCIMENTO1, values: [{ value: Math.floor(Date.parse(`${p.programada.vencimento}T12:00:00-03:00`) / 1000) }] },
+          { field_id: CAMPO_CONSULTOR, values: [{ enum_id: CONSULTOR_LUCYANNO }] },
+          { field_id: CAMPO_CONTRATO_NOME, values: [{ value: p.nome }] },
+          ...(p.cpf ? [{ field_id: CAMPO_CONTRATO_CPF, values: [{ value: p.cpf }] }] : []),
         ] : [];
         const todos = [...(origemCampo ? [origemCampo] : []), ...extras];
         return todos.length ? { custom_fields_values: todos } : {};
@@ -442,6 +491,18 @@ Deno.serve(async (req: Request) => {
       .catch((e) => console.error("[lp-leads] nota falhou", leadId, String(e).slice(0, 200)));
     console.log("[lp-leads] lead criado", { tipo: p.tipo, leadId });
     if (p.tipo === "visto" && veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
+
+    // Viagem Programada: contato antigo recebe e-mail e endereço do site; o HUB gera e envia o contrato (em segundo plano).
+    if (p.tipo === "programada" && p.programada) {
+      const prog = p.programada, email = p.email;
+      const trabalho = (async () => {
+        if (existente) await atualizarContatoProgramada(existente.id, email, prog.endereco).catch((e) => console.error("[lp-leads] contato programada", leadId, String(e).slice(0, 200)));
+        await avisarHubContrato(leadId).catch((e) => console.error("[lp-leads] aviso contrato", leadId, String(e).slice(0, 200)));
+      })();
+      // deno-lint-ignore no-explicit-any
+      const er = (globalThis as any).EdgeRuntime;
+      if (er?.waitUntil) er.waitUntil(trabalho); else await trabalho;
+    }
 
     let cob: Awaited<ReturnType<typeof criarCobranca>> | null = null;
     if (p.tipo === "passaporte" && p.preco && p.cpf) {
