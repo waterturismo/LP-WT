@@ -124,6 +124,8 @@ async function asaas<T>(c: CfgAsaas, metodo: string, caminho: string, corpo?: un
 const CAMPO_STATUS_PAG = 1043859, STATUS_AGUARDANDO = 1013717, CAMPO_PIX = 1043867;
 // Lead de passaporte: "Fornecedor:" = Passaporte e "Total de Pax's:".
 const CAMPO_FORNECEDOR = 117590, FORNECEDOR_PASSAPORTE = 545416, CAMPO_TOTAL_PAX = 252928;
+// Compra pelo site: "Consultor" = Lucyanno só na criação do lead (a equipe pode trocar depois no Kommo).
+const CAMPO_CONSULTOR = 263974, CONSULTOR_LUCYANNO = 217110;
 
 // ---------- InfinitePay (cartão) ----------
 // Chave e handle no HUB (tabela integracao_infinitepay). Juros do parcelamento por conta de quem paga.
@@ -287,7 +289,7 @@ function montarPedido(b: Record<string, unknown>): Pedido | string {
   if (tipo === "programada") {
     const plano = txt(b.plano, 20), m = PLANOS[plano], n = inteiro(b.parcelas, 12, 36);
     if (!m) return "plano";
-    if (n === null || ![12, 18, 24, 30, 36].includes(n)) return "parcelas";
+    if (n === null || ![12, 18, 24].includes(n)) return "parcelas";
     const venc = txt(b.vencimento_1o_boleto, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(venc)) return "vencimento";
     if (b.aceite_regras !== true) return "regras";
@@ -421,6 +423,7 @@ Deno.serve(async (req: Request) => {
         const extras = p.tipo === "passaporte" ? [
           { field_id: CAMPO_FORNECEDOR, values: [{ enum_id: FORNECEDOR_PASSAPORTE }] },
           { field_id: CAMPO_TOTAL_PAX, values: [{ value: String(p.quantidade ?? 1) }] },
+          { field_id: CAMPO_CONSULTOR, values: [{ enum_id: CONSULTOR_LUCYANNO }] },
         ] : [];
         const todos = [...(origemCampo ? [origemCampo] : []), ...extras];
         return todos.length ? { custom_fields_values: todos } : {};
