@@ -1,6 +1,8 @@
 // Recebe os formulários da LP Water Turismo (visto, passaporte, Viagem Programada)
 // e cria o lead no Kommo: funil VENDAS 1 — visto em PREPARAR PROPOSTA, os demais em RESERVA — com contato, etiquetas e nota.
 // v18: passaporte a R$ 130 com Pix (Asaas) + cartão (InfinitePay); e-mail só depois do pagamento; Fornecedor = Passaporte e Total de Pax no lead.
+// v19: semáforo/disjuntor do Kommo em todas as chamadas; se o Kommo estiver fora, o pedido fica na fila (kommo_fila),
+//      o passaporte já mostra Pix/cartão (cobrança com lead 0) e o lead é criado depois, ligado à cobrança.
 // O token do Kommo fica no segredo KOMMO_TOKEN do Supabase — nunca no site.
 
 const KOMMO_SUBDOMINIO = Deno.env.get("KOMMO_SUBDOMINIO") ?? "waterturismo";
@@ -45,14 +47,29 @@ function excedeuLimite(ip: string) {
 }
 
 // ---------- Kommo ----------
+// Semáforo e disjuntor do Kommo (tabela kommo_disjuntor): no máximo 4 chamadas/s somando todo o sistema;
+// 429 ou 403 de bloqueio → pausa geral (evita o bloqueio longo de 15/11/2026).
+async function rpcBanco(nome: string, corpo: unknown): Promise<unknown> {
+  const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/rest/v1/rpc/${nome}`, { method: "POST", signal: AbortSignal.timeout(5000),
+    headers: { apikey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`, "Content-Type": "application/json" },
+    body: JSON.stringify(corpo) });
+  return r.ok ? await r.json().catch(() => null) : null;
+}
 async function kommo<T>(caminho: string, init?: RequestInit): Promise<T | null> {
   const token = Deno.env.get("KOMMO_TOKEN");
   if (!token) throw new Error("KOMMO_TOKEN não configurado");
+  const ms = Number(await rpcBanco("kommo_reservar", {}).catch(() => 0)) || 0;
+  if (ms === -1 || ms === -2) throw new Error(ms === -1 ? "Kommo em pausa (disjuntor)" : "Kommo ocupado (semáforo)");
+  if (ms > 0) await new Promise((ok) => setTimeout(ok, ms));
   const r = await fetch(`https://${KOMMO_SUBDOMINIO}.kommo.com/api/v4${caminho}`, {
     ...init,
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     signal: AbortSignal.timeout(8000),
   });
+  if (r.status === 429 || r.status === 403) {
+    const corpo = await r.clone().text().catch(() => "");
+    if (r.status === 429 || /<html|nginx/i.test(corpo)) await rpcBanco("kommo_registrar_falha", { p_status: r.status, p_origem: "site" }).catch(() => null);
+  }
   if (r.status === 204) return null;
   if (!r.ok) throw new Error(`Kommo ${r.status} em ${caminho}: ${(await r.text().catch(() => "")).slice(0, 200)}`);
   return (await r.json()) as T;
@@ -193,8 +210,9 @@ async function linkCartao(orderNsu: string, valor: number, p: { nome: string; em
 }
 
 /** Cobrança do site: Pix (Asaas) + cartão (InfinitePay) numa só cobrança. Pago um, o HUB cancela o outro. */
-async function criarCobranca(leadId: number, valor: number, p: { nome: string; email: string; telefone: string; cpf: string; titulo: string }) {
-  const orderNsu = `WT${leadId}-${Date.now().toString(36)}`;
+async function criarCobranca(leadId: number, valor: number, p: { nome: string; email: string; telefone: string; cpf: string; titulo: string }, pedido?: string) {
+  // Sem lead (Kommo fora): número próprio do pedido; o lead é ligado depois pela fila.
+  const orderNsu = leadId ? `WT${leadId}-${Date.now().toString(36)}` : `WTP-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   const falhas: string[] = [];
   let pix: { pedido: string; qr: string; img: string } | null = null;
   const c = await cfgAsaas();
@@ -211,7 +229,7 @@ async function criarCobranca(leadId: number, valor: number, p: { nome: string; e
       const amanha = new Date(Date.now() - 3 * 3600 * 1000 + 24 * 3600 * 1000).toISOString().slice(0, 10);
       const pag = await asaas<{ id: string }>(c, "POST", "/payments", {
         customer: cliente, billingType: "PIX", value: valor, dueDate: amanha,
-        description: "Water Turismo · Assessoria Passaporte", externalReference: `Lead ${leadId} · ${p.titulo}`.slice(0, 100),
+        description: "Water Turismo · Assessoria Passaporte", externalReference: `${leadId ? `Lead ${leadId}` : `Pedido ${orderNsu}`} · ${p.titulo}`.slice(0, 100),
       });
       const qr = await asaas<{ payload?: string; encodedImage?: string }>(c, "GET", `/payments/${pag.id}/pixQrCode`);
       if (!qr.payload || !qr.encodedImage) throw new Error("Asaas não devolveu o QR Code");
@@ -226,9 +244,9 @@ async function criarCobranca(leadId: number, valor: number, p: { nome: string; e
   await banco("cobrancas", { method: "POST", body: JSON.stringify({
     kommo_lead_id: leadId, valor_centavos: Math.round(valor * 100), order_nsu: orderNsu, origem: "site", cliente_nome: p.nome, expira_em: expira,
     asaas_id: pix?.pedido ?? null, pix_payload: pix?.qr ?? null, pix_imagem: pix?.img ?? null, checkout_url: cartao, servico: "Assessoria Passaporte",
-    erro: falhas.length ? falhas.join(" | ").slice(0, 300) : null,
+    erro: falhas.length ? falhas.join(" | ").slice(0, 300) : (pedido ? `aguardando lead (${pedido})` : null),
   }) }).catch((e) => console.error("[lp-leads] registrar cobrança", leadId, String(e).slice(0, 200)));
-  await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [
+  if (leadId) await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [
     { field_id: CAMPO_STATUS_PAG, values: [{ enum_id: STATUS_AGUARDANDO }] }, { field_id: CAMPO_PIX, values: [{ value: pix?.qr ?? "" }] },
   ] }) }).catch((e) => console.error("[lp-leads] campos pagamento", leadId, String(e).slice(0, 200)));
   return { pix: pix ? { ...pix, valor: valor.toFixed(2), nsu: orderNsu } : null, cartao, nsu: orderNsu, falhas };
@@ -395,45 +413,8 @@ function cors(origem: string | null) {
 const json = (corpo: unknown, status: number, h: Record<string, string>) =>
   new Response(JSON.stringify(corpo), { status, headers: { ...h, "Content-Type": "application/json" } });
 
-Deno.serve(async (req: Request) => {
-  const origem = req.headers.get("origin"), h = cors(origem);
-  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
-  if (req.method !== "POST") return json({ ok: false, erro: "método" }, 405, h);
-
-  // Aviso antigo do Mercado Pago (desativado: o Pix agora é pelo Asaas, com aviso para o HUB).
-  if (new URL(req.url).searchParams.get("mp") === "1") return new Response("ok", { status: 200 });
-
-  if (!origem || !ORIGENS_PERMITIDAS.includes(origem)) return json({ ok: false, erro: "origem" }, 403, h);
-
-  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
-  const bruto = await req.text();
-  if (bruto.length > 20000) return json({ ok: false, erro: "tamanho" }, 413, h);
-  let b: Record<string, unknown>;
-  try { b = JSON.parse(bruto); } catch { return json({ ok: false, erro: "json" }, 400, h); }
-
-  // Estatística de visita/clique (link da bio e análise).
-  if (b.acao === "evento") {
-    const pagina = txt(b.pagina, 20), evento = txt(b.evento, 10), alvo = txt(b.alvo, 40) || null;
-    const ok = (["/bio", "/analise"].includes(pagina) && (evento === "visita" || (evento === "clique" && pagina === "/bio" && alvo !== null && ALVOS.includes(alvo))))
-      || (pagina === "/viagem-programada" && (evento === "visita" || evento === "inicio"));
-    if (ok && !excedeuConsultas(ip)) await registrarEvento(pagina, evento, evento === "clique" ? alvo : null, req.headers.get("user-agent") ?? "", txt(b.marcacao, 60), txt(b.referencia, 300))
-      .catch((e) => console.error("[lp-leads] evento", String(e).slice(0, 200)));
-    return new Response(null, { status: 204, headers: h });
-  }
-
-  // A tela do Pix pergunta de tempos em tempos se o pagamento já caiu.
-  if (b.acao === "status_pix") {
-    if (excedeuConsultas(ip)) return json({ ok: false, erro: "limite" }, 429, h);
-    try { return json({ ok: true, pago: await pixPago(txt(b.pedido, 64)) }, 200, h); }
-    catch (e) { console.error("[lp-leads] status pix", String(e).slice(0, 200)); return json({ ok: true, pago: false }, 200, h); }
-  }
-  if (excedeuLimite(ip)) return json({ ok: false, erro: "limite" }, 429, h);
-  if (txt(b.site_web)) return json({ ok: true }, 200, h); // campo anti-robô preenchido: ignora em silêncio
-
-  const p = montarPedido(b);
-  if (typeof p === "string") return json({ ok: false, erro: `campo inválido: ${p}` }, 422, h);
-
-  try {
+/** Cria (ou reaproveita) o lead no Kommo para um pedido do site. Lança erro se o Kommo não responder. */
+async function registrarNoKommo(p: Pedido, analise: unknown, ua: string, atraso?: string): Promise<{ leadId: number; reaproveitado: boolean; existente: boolean }> {
     const [destino, origemCampo, existente] = await Promise.all([etapaDestino(p.tipo === "visto" ? ETAPA_VISTO : ETAPA), campoOrigem(), contatoExistente(p.telefone)]);
     // Visto: se o contato já tem um lead de visto aberto, a nova análise entra nele como nota (sem criar outro lead).
     if (p.tipo === "visto" && existente) {
@@ -445,8 +426,8 @@ Deno.serve(async (req: Request) => {
           ...p.nota, "", `Enviado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`].join("\n");
         await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: aberto.id, note_type: "common", params: { text: texto } }]) });
         console.log("[lp-leads] lead reaproveitado", { tipo: p.tipo, leadId: aberto.id });
-        if (veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
-        return json({ ok: true }, 200, h);
+        if (veioDaBio(analise)) await registrarEvento("/analise", "envio", null, ua).catch(() => {});
+        return { leadId: aberto.id, reaproveitado: true, existente: !!existente };
       }
     }
     const contato = existente ? { id: existente.id } : {
@@ -486,16 +467,15 @@ Deno.serve(async (req: Request) => {
     const criado = await kommo<{ id: number }[]>("/leads/complex", { method: "POST", body: JSON.stringify([lead]) });
     const leadId = criado?.[0]?.id;
     if (!leadId) throw new Error("Kommo não devolveu o lead");
-    const texto = [...p.nota, ...(existente ? ["", "Atenção: este telefone já existia no Kommo. Confira se a pessoa já foi cliente."] : []),
+    const texto = [...(atraso ? [`⏳ Lead criado com atraso: o site recebeu o pedido em ${atraso}, quando o Kommo estava fora do ar.`, ""] : []), ...p.nota, ...(existente ? ["", "Atenção: este telefone já existia no Kommo. Confira se a pessoa já foi cliente."] : []),
       "", `Enviado em ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.`].join("\n");
     await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text: texto } }]) })
       .catch((e) => console.error("[lp-leads] nota falhou", leadId, String(e).slice(0, 200)));
     console.log("[lp-leads] lead criado", { tipo: p.tipo, leadId });
-    if (p.tipo === "visto" && veioDaBio(b.analise)) await registrarEvento("/analise", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
+    if (p.tipo === "visto" && veioDaBio(analise)) await registrarEvento("/analise", "envio", null, ua).catch(() => {});
 
     // Viagem Programada: contato antigo recebe e-mail e endereço do site; o HUB gera e envia o contrato (em segundo plano).
     if (p.tipo === "programada" && p.programada) {
-      await registrarEvento("/viagem-programada", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
       const prog = p.programada, email = p.email;
       const trabalho = (async () => {
         if (existente) await atualizarContatoProgramada(existente.id, email, prog.endereco).catch((e) => console.error("[lp-leads] contato programada", leadId, String(e).slice(0, 200)));
@@ -505,7 +485,114 @@ Deno.serve(async (req: Request) => {
       const er = (globalThis as any).EdgeRuntime;
       if (er?.waitUntil) er.waitUntil(trabalho); else await trabalho;
     }
+    return { leadId, reaproveitado: false, existente: !!existente };
+}
 
+Deno.serve(async (req: Request) => {
+  const origem = req.headers.get("origin"), h = cors(origem);
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: h });
+  if (req.method !== "POST") return json({ ok: false, erro: "método" }, 405, h);
+
+  // Aviso antigo do Mercado Pago (desativado: o Pix agora é pelo Asaas, com aviso para o HUB).
+  if (new URL(req.url).searchParams.get("mp") === "1") return new Response("ok", { status: 200 });
+
+  if (!origem || !ORIGENS_PERMITIDAS.includes(origem)) return json({ ok: false, erro: "origem" }, 403, h);
+
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "?";
+  const bruto = await req.text();
+  if (bruto.length > 20000) return json({ ok: false, erro: "tamanho" }, 413, h);
+  let b: Record<string, unknown>;
+  try { b = JSON.parse(bruto); } catch { return json({ ok: false, erro: "json" }, 400, h); }
+
+  // Estatística de visita/clique (link da bio e análise).
+  if (b.acao === "evento") {
+    const pagina = txt(b.pagina, 20), evento = txt(b.evento, 10), alvo = txt(b.alvo, 40) || null;
+    const ok = (["/bio", "/analise"].includes(pagina) && (evento === "visita" || (evento === "clique" && pagina === "/bio" && alvo !== null && ALVOS.includes(alvo))))
+      || (pagina === "/viagem-programada" && (evento === "visita" || evento === "inicio"));
+    if (ok && !excedeuConsultas(ip)) await registrarEvento(pagina, evento, evento === "clique" ? alvo : null, req.headers.get("user-agent") ?? "", txt(b.marcacao, 60), txt(b.referencia, 300))
+      .catch((e) => console.error("[lp-leads] evento", String(e).slice(0, 200)));
+    return new Response(null, { status: 204, headers: h });
+  }
+
+  // A tela do Pix pergunta de tempos em tempos se o pagamento já caiu.
+  if (b.acao === "status_pix") {
+    if (excedeuConsultas(ip)) return json({ ok: false, erro: "limite" }, 429, h);
+    try { return json({ ok: true, pago: await pixPago(txt(b.pedido, 64)) }, 200, h); }
+    catch (e) { console.error("[lp-leads] status pix", String(e).slice(0, 200)); return json({ ok: true, pago: false }, 200, h); }
+  }
+  // Fila (kommo-fila): cria o lead de um pedido que chegou com o Kommo fora e liga a cobrança a ele.
+  if (b.acao === "concluir_pedido") {
+    const seg = (await banco<{ valor: string }[]>("segredos_internos?nome=eq.hub_contratos&select=valor").catch(() => []))?.[0]?.valor;
+    if (!seg || req.headers.get("authorization") !== `Bearer ${seg}`) return json({ ok: false, erro: "não autorizado" }, 401, h);
+    const chave = txt(b.chave, 80);
+    const item = (await banco<{ payload: Record<string, unknown> }[]>(`kommo_fila?chave=eq.${encodeURIComponent(chave)}&concluido_em=is.null&select=payload`))?.[0];
+    if (!item) return json({ ok: true, nada: true }, 200, h);
+    const pl = item.payload as { pedido: Pedido; analise: unknown; recebido: string; order_nsu: string | null; lead_id?: number };
+    try {
+      let leadId = Number(pl.lead_id) || 0;
+      if (!leadId) {
+        leadId = (await registrarNoKommo(pl.pedido, pl.analise, "", pl.recebido)).leadId;
+        await rpcBanco("kommo_enfileirar", { p_tipo: "site_pedido", p_chave: chave, p_payload: { lead_id: leadId } }); // não cria em dobro se algo abaixo falhar
+      }
+      if (pl.order_nsu) {
+        const [c] = await banco<{ situacao: string; pix_payload: string | null; valor_centavos: number }[]>(
+          `cobrancas?order_nsu=eq.${encodeURIComponent(pl.order_nsu)}&select=situacao,pix_payload,valor_centavos`);
+        await banco(`cobrancas?order_nsu=eq.${encodeURIComponent(pl.order_nsu)}&kommo_lead_id=eq.0`, { method: "PATCH", body: JSON.stringify({ kommo_lead_id: leadId, erro: null }) });
+        if (c?.situacao === "pago") {
+          // Já pago antes de o lead existir: o HUB aplica o pagamento no lead (campos, nota, venda fechada).
+          const r = await fetch(`${HUB_AVISOS}/api/pagamentos/reaplicar`, { method: "POST", signal: AbortSignal.timeout(55000),
+            headers: { Authorization: `Bearer ${seg}`, "Content-Type": "application/json" }, body: JSON.stringify({ order_nsu: pl.order_nsu }) });
+          if (!r.ok) throw new Error(`HUB reaplicar ${r.status}`);
+        } else if (c) {
+          if (c.situacao === "aguardando") await kommo(`/leads/${leadId}`, { method: "PATCH", body: JSON.stringify({ custom_fields_values: [
+            { field_id: CAMPO_STATUS_PAG, values: [{ enum_id: STATUS_AGUARDANDO }] }, { field_id: CAMPO_PIX, values: [{ value: c.pix_payload ?? "" }] }] }) });
+          await kommo("/leads/notes", { method: "POST", body: JSON.stringify([{ entity_id: leadId, note_type: "common", params: { text: c.situacao === "aguardando"
+            ? `💳 Pagamento gerado no site em ${pl.recebido} · ${brl(c.valor_centavos / 100)} · Assessoria Passaporte · válido por 24 h\nAguardando pagamento. Pago, o lead vai sozinho para venda fechada.`
+            : `⌛ O Pix/cartão gerado no site em ${pl.recebido} (${brl(c.valor_centavos / 100)}) não foi pago dentro de 24 h.` } }]) });
+        }
+      }
+      return json({ ok: true, leadId }, 200, h);
+    } catch (e) {
+      console.error("[lp-leads] concluir pedido", chave, String(e).slice(0, 200));
+      return json({ ok: false, erro: String(e).slice(0, 120) }, 503, h);
+    }
+  }
+  if (excedeuLimite(ip)) return json({ ok: false, erro: "limite" }, 429, h);
+  if (txt(b.site_web)) return json({ ok: true }, 200, h); // campo anti-robô preenchido: ignora em silêncio
+
+  const p = montarPedido(b);
+  if (typeof p === "string") return json({ ok: false, erro: `campo inválido: ${p}` }, 422, h);
+
+  const ua = req.headers.get("user-agent") ?? "";
+  if (p.tipo === "programada") await registrarEvento("/viagem-programada", "envio", null, ua).catch(() => {});
+  let reg: Awaited<ReturnType<typeof registrarNoKommo>> | null = null;
+  try {
+    reg = await registrarNoKommo(p, b.analise, ua);
+  } catch (e) {
+    // Kommo fora do ar (ou em pausa): guarda o pedido na fila e segue. O lead é criado quando o Kommo voltar.
+    console.error("[lp-leads] Kommo indisponível, pedido vai para a fila", p.tipo, String(e).slice(0, 200));
+    try {
+      const chave = `pedido:${crypto.randomUUID()}`;
+      const recebido = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+      let cob: Awaited<ReturnType<typeof criarCobranca>> | null = null;
+      if (p.tipo === "passaporte" && p.preco && p.cpf) {
+        cob = await criarCobranca(0, p.preco, { nome: p.nome, email: p.email, telefone: p.telefone, cpf: p.cpf, titulo: p.titulo }, chave).catch(() => null);
+      }
+      const ok = await rpcBanco("kommo_enfileirar", { p_tipo: "site_pedido", p_chave: chave, p_payload: { pedido: p, analise: b.analise ?? null, recebido, order_nsu: cob?.nsu ?? null } });
+      if (ok === null) {
+        // Confere se gravou (a função não devolve nada): sem fila não dá para garantir o lead → plano B do WhatsApp.
+        const l = await banco<{ id: number }[]>(`kommo_fila?chave=eq.${encodeURIComponent(chave)}&select=id`).catch(() => []);
+        if (!l?.length) throw new Error("fila indisponível");
+      }
+      return json({ ok: true, pix: cob?.pix ?? null, cartao: cob?.cartao ?? null, adiado: true }, 200, h);
+    } catch (e2) {
+      console.error("[lp-leads] falha", p.tipo, String(e2).slice(0, 300));
+      return json({ ok: false, erro: "kommo" }, 502, h);
+    }
+  }
+  if (reg.reaproveitado) return json({ ok: true }, 200, h);
+  const leadId = reg.leadId;
+  try {
     let cob: Awaited<ReturnType<typeof criarCobranca>> | null = null;
     if (p.tipo === "passaporte" && p.preco && p.cpf) {
       try {
