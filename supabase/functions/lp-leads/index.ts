@@ -353,7 +353,7 @@ function excedeuConsultas(ip: string) {
 // ---------- estatística do site (link da bio e análise) ----------
 // Sem dados pessoais: só página, evento, origem e tipo de aparelho. Grava em public.site_eventos (painel do Indique e Ganhe).
 const ROBOS = /bot|crawl|spider|slurp|facebookexternalhit|whatsapp\/|telegrambot|preview|headless|lighthouse|curl|wget|python|axios|node-fetch|go-http|java\/|monitor|uptime|scan/i;
-const ALVOS = ["lista_vip_black", "visto", "passaporte"];
+const ALVOS = ["lista_vip_black", "visto", "passaporte", "programada"];
 const sistemaDe = (ua: string) => /android/i.test(ua) ? "Android" : /iphone|ipad|ipod/i.test(ua) ? "iOS (iPhone/iPad)" : /windows/i.test(ua) ? "Windows"
   : /mac os x|macintosh/i.test(ua) ? "macOS" : /cros/i.test(ua) ? "ChromeOS" : /linux/i.test(ua) ? "Linux" : "Outro";
 const aparelhoDe = (ua: string) => (/ipad|tablet/i.test(ua) || (/android/i.test(ua) && !/mobile/i.test(ua))) ? "Tablet" : /mobi|iphone|ipod|android/i.test(ua) ? "Celular" : "Computador";
@@ -414,7 +414,8 @@ Deno.serve(async (req: Request) => {
   // Estatística de visita/clique (link da bio e análise).
   if (b.acao === "evento") {
     const pagina = txt(b.pagina, 20), evento = txt(b.evento, 10), alvo = txt(b.alvo, 40) || null;
-    const ok = ["/bio", "/analise"].includes(pagina) && (evento === "visita" || (evento === "clique" && pagina === "/bio" && alvo !== null && ALVOS.includes(alvo)));
+    const ok = (["/bio", "/analise"].includes(pagina) && (evento === "visita" || (evento === "clique" && pagina === "/bio" && alvo !== null && ALVOS.includes(alvo))))
+      || (pagina === "/viagem-programada" && (evento === "visita" || evento === "inicio"));
     if (ok && !excedeuConsultas(ip)) await registrarEvento(pagina, evento, evento === "clique" ? alvo : null, req.headers.get("user-agent") ?? "", txt(b.marcacao, 60), txt(b.referencia, 300))
       .catch((e) => console.error("[lp-leads] evento", String(e).slice(0, 200)));
     return new Response(null, { status: 204, headers: h });
@@ -494,6 +495,7 @@ Deno.serve(async (req: Request) => {
 
     // Viagem Programada: contato antigo recebe e-mail e endereço do site; o HUB gera e envia o contrato (em segundo plano).
     if (p.tipo === "programada" && p.programada) {
+      await registrarEvento("/viagem-programada", "envio", null, req.headers.get("user-agent") ?? "").catch(() => {});
       const prog = p.programada, email = p.email;
       const trabalho = (async () => {
         if (existente) await atualizarContatoProgramada(existente.id, email, prog.endereco).catch((e) => console.error("[lp-leads] contato programada", leadId, String(e).slice(0, 200)));
